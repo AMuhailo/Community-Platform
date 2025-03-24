@@ -1,0 +1,21 @@
+
+    {% if message.author == user %}
+        <div class="message right">
+            <img src="https://i.pravatar.cc/40?img=2" alt="Your Avatar">
+            <div class="message-content">
+                <div class="sender-name">{{ message.author }}</div>
+                <div>{{ message.body }}</div>
+                <div class="timestamp">{{ message.created.time }}</div>
+            </div>
+        </div>
+    {% else %}
+        <div class="message left">
+            <img src="https://i.pravatar.cc/40?img=1" alt="User Avatar">
+            <div class="message-content">
+                <div class="sender-name">{{ message.author }}</div>
+                <div>{{ message.body }}</div>
+                <div class="timestamp">{{ message.created.time }}</div>
+            </div>
+        </div>
+    {% endif %}
+
