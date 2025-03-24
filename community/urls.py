@@ -19,12 +19,14 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.auth.views import LoginView, LogoutView
 from django.urls import include, path
+from employees.views import RegisterUser
 
 urlpatterns = [
+    path('register/',RegisterUser.as_view(),name='register'),
     path('login/', LoginView.as_view(), name = 'login'),
     path('logout/', LogoutView.as_view(), name = 'logout'),
     path('admin/', admin.site.urls),
-    path('employee/',include('employees.urls')),
+    path('employees/',include('employees.urls')),
 ]
 
 if settings.DEBUG:

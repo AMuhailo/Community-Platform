@@ -14,6 +14,7 @@ class Profile(models.Model):
     avatar = models.FileField(upload_to = 'avatar/', blank = True, null = True)
     number = models.CharField(max_length = 20, blank = True, null = True)
     age = models.IntegerField(default = 0)
+    bio = models.TextField(max_length=500, blank = True, null = True)
     
     class Meta:
         ordering = ['user']

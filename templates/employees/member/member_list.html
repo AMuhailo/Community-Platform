@@ -1,0 +1,10 @@
+{% for member in members %}
+    {% with user=member.user.user %}
+        <p>
+           {{ user.username }}
+        </p>
+        <p>{{ user.get_full_name }}</p>
+        <p>{{ user.email }}</p>
+    {% endwith %}
+
+{% endfor %}    

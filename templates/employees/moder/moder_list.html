@@ -1,0 +1,10 @@
+{% for moder in moderators %}
+    {% with user=moder.user.user %}
+        <p>
+            <a href="{% url 'moder_update_url' moder.user.user.username moder.user.user.id%}">{{ user.username }}</a>
+        </p>
+        <p>{{ user.get_full_name }}</p>
+        <p>{{ user.email }}</p>
+    {% endwith %}
+
+{% endfor %}    

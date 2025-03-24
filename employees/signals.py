@@ -10,6 +10,6 @@ def profile_post_save(sender, instance, created, **kwargs):
         Profile.objects.create(user = instance)
         
 @receiver(post_save, sender = Profile)
-def profile_post_save(sender, instance, created, **kwargs):
+def user_post_save(sender, instance, created, **kwargs):
     if created:
         Member.objects.create(user = instance)

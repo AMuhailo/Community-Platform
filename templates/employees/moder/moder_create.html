@@ -1,4 +1,4 @@
-<form method="POST" action="{% url 'moder_create' %}">
+<form method="POST" action="{% url 'moder_create_url' %}">
     {% csrf_token %}
     {{ form.as_p }}
     <input type='submit' value='Add Moderator'>
