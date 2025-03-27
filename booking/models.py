@@ -2,6 +2,7 @@ import uuid
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils import timezone
+from django.urls import reverse
 from employees.models import Member
 # Create your models here.
 
@@ -44,6 +45,10 @@ class Booking(models.Model):
         ordering = ['-id','-start_time','end_time']
         indexes = [models.Index(fields = ['start_time']),
                    models.Index(fields = ['-end_time'])]
-        
+    
+    def get_absolute_url(self):
+        return reverse("booking_detail_url", args = [self.id])
+    
+    
     def __str__(self):
         return f"Booking №{self.id}"

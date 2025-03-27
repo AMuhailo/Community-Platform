@@ -1,4 +1,5 @@
 from random import randint
+from django.http import Http404
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse_lazy, reverse
 from django.contrib.auth import get_user_model
@@ -30,6 +31,15 @@ class ProfileUser(DetailView):
     
     def get_object(self, queryset = ...):
         return get_object_or_404(self.model, username = self.kwargs.get('username'))
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        if self.get_object().profile.member_user.category == 'DR':
+            vehicles = self.get_object().profile.member_user.owner_vehicle.all()
+        context["vehicles"] = vehicles
+        return context
+    
     
 class ModeratorCreateView(CreateView):
     model = Moderator

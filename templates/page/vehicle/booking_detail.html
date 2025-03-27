@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="trip-details-container">
+        <div class="row">
+
+            <div class="col-md-4 driver-section">
+                <img src="https://i.pravatar.cc/300?img={{ trip.vehicle.owner.id}}" alt="Driver" class="driver-img">
+                <h5>{{ trip.vehicle.owner }}</h5>
+                <p><i class="fas fa-star text-warning"></i> 4.8 (120 відгуків)</p>
+            </div>
+
+            <div class="col-md-4 route-section">
+                <h5>{{ trip.from_place }} → {{ trip.to_place }}</h5>
+                <p><i class="far fa-calendar-alt"></i> {{ trip.start_time.date }}</p>
+                <p><i class="far fa-clock"></i> Departures: {{ trip.start_time.time }}</p>
+                <div class="route-line"></div>
+                <p><i class="far fa-clock"></i> Arrival: {{ trip.end_time.time }}</p>
+                <p><i class="fas fa-hourglass-half"></i> Duration: {{ trip.time }}</p>
+            </div>
+
+            <div class="col-md-4 car-section">
+                <h5>
+                    {% if trip.vehicle.vehicle != 'bus' %}
+                        Car
+                    {% else %}
+                        Bus
+                    {% endif %}
+                </h5>
+                <p><i class="fas fa-car"></i> {{  trip.vehicle.brand }}</p>
+                <p><i class="far fa-calendar"></i> Year: {{  trip.vehicle.year }}</p>
+                <p><i class="fas fa-users"></i> Capacity: {{  trip.vehicle.capicity }}</p>
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <button class="book-btn">Make a reservation - ₴500</button>
+        </div>
+    </div>
+{% endblock content %}

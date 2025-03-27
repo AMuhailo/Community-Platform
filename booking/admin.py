@@ -3,5 +3,11 @@ from booking.models import Vehicle, Booking
 
 # Register your models here.
 
-admin.site.register(Vehicle)
+
+@admin.register(Vehicle)
+class VehicleAdmin(admin.ModelAdmin):
+    list_display = ['vehicle','brand','year','capicity','location','owner']
+    list_filter = ['vehicle','year']
+    list_editable = ['year','location','capicity']
+    
 admin.site.register(Booking)

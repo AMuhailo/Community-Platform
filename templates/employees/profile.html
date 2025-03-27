@@ -11,13 +11,34 @@
         <div class="flex-grow-1">
             <h5 class="mb-3">Planned events:</h5>
             <div class="events-container">
-                <div class="event">📅 <strong>14 Mar:</strong> Зустріч з командою</div>
-                <div class="event">📅 <strong>20 Mar:</strong> Вебінар про Django</div>
-                <div class="event">📅 <strong>25 Mar:</strong> Співбесіда на роботу</div>
-                <div class="event">📅 <strong>30 Mar:</strong> Хакатон</div>
-                <div class="event">📅 <strong>5 Jun:</strong> Презентація проекту</div>
+            {% for vehicle in vehicles %}
+                {% for trip in vehicle.vehicle_booking.all %}
+                    <div class="vehicle-info">
+                        <div class="text-center">
+                            {% if trip.vehicle.vehicle != 'bus' %}
+                                <i class="bi bi-car-front-fill fs-2"></i>
+                            {% else %}
+                                <i class="bi bi-bus-front-fill fs-2"></i>
+                            {% endif %}
+                            <div class="route-time">{{ trip.start_time.time }}</div>
+                        </div>
+                        <div class="route-line"></div>
+                        <div class="route-info text-center w-75">
+                            <div><a href="{% url 'booking_update_url' trip.id%}" class='text-decoration-none text-warning'>{{ trip.from_place }} → {{ trip.to_place }}</a></div>
+                            <div class="route-time">{{ trip.start_time.date }}</div>
+                            <div class="route-time">{{ trip.time }}</div>
+                        </div>
+        
+                        <div class="route-line"></div>
+                        <div class="text-center">
+                            <i class="bi bi-geo-alt-fill fs-2 text-danger"></i>
+                            <div class="route-time">{{ trip.end_time.time }}</div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endfor %}
             </div>
-            <button class="btn btn-success btn-sm mt-3 w-100">Add events</button>
+            <a href="{% url 'booking_create_url' %}" class="btn btn-success btn-sm mt-3 w-100">Add events</a>
         </div>
     </div>
 </div>

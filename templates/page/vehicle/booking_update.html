@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="form-container">
+    <h4 class="text-center mb-3">Додати/Оновити поїздку</h4>
+    <form method='POST'>
+        {% csrf_token %}
+        <div class="form-section bg-light">
+            <h5><i class="fas fa-map-marker-alt"></i> Маршрут</h5>
+            <div class="mb-3">
+                <label for="departure" class="form-label">Пункт відправлення</label>
+                <input type="text" name="from_place" class="form-control" id="departure" placeholder="Введіть місто відправлення">
+            </div>
+            <div class="mb-3">
+                <label for="arrival" class="form-label">Пункт прибуття</label>
+                <input type="text" name="to_place" class="form-control" id="arrival" placeholder="Введіть місто прибуття">
+            </div>
+            <div class="mb-3">
+                <label for="date" class="form-label">Дата поїздки</label>
+                <input type="date" name="start_time" class="form-control" id="date">
+            </div>
+            <div class="mb-3">
+                <label for="time" class="form-label">Час відправлення</label>
+                <input type="time" name='start_time' class="form-control" id="time">
+            </div>
+            <div class="mb-3">
+                <label for="time" class="form-label">Час прибуття</label>
+                <input type="time" name='end_time' class="form-control" id="time">
+            </div>
+            <div class="mb-3">
+                <label for="price" class="form-label">Ціна (₴)</label>
+                <input type="number" name='price' class="form-control" id="price" placeholder="Вкажіть вартість поїздки">
+            </div>
+        </div>
+        <div class="form-section mt-3">
+            <h5><i class="fas fa-car"></i> Інформація про авто</h5>
+            <div class="mb-3">
+                <label for="car-brand" class="form-label">Марка авто</label>
+                <input type="text" name='brand' class="form-control" id="car-brand" placeholder="Toyota, BMW, Audi...">
+            </div>
+            <div class="mb-3">
+                <label for="car-year" class="form-label">Рік випуску</label>
+                <input type="number" name='year' class="form-control" id="car-year" placeholder="Наприклад, 2020">
+            </div>
+            <div class="mb-3">
+                <label for="capacity" class="form-label">Кількість місць</label>
+                <input type="number" name='capacity' class="form-control" id="capacity" placeholder="Вкажіть кількість пасажирських місць">
+            </div>
+        </div>
+        <div class="text-center mt-4">
+            <button type="submit" class="btn-submit">Зберегти</button>
+        </div>
+    </form>
+</div>
+{% endblock content %}
