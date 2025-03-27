@@ -27,7 +27,6 @@ urlpatterns = [
     path('logout/', LogoutView.as_view(), name = 'logout'),
     path('admin/', admin.site.urls),
     path('employees/',include('employees.urls')),
-    path('chat/',include('chat.urls'))
 ]
 
 if settings.DEBUG:
