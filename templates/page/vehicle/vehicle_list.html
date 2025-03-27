@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<div class="container-custom">
+    <!-- Шапка списку -->
+    <h2 class="text-center mb-3">🚗 Доступні поїздки</h2>
+
+    <!-- Форма фільтрації -->
+    <form class="filter-form mb-4">
+        <div class="row">
+            <div class="col-md-3">
+                <input type="date" class="form-control" placeholder="Дата">
+            </div>
+            <div class="col-md-2">
+                <input type="time" class="form-control">
+            </div>
+            <div class="col-md-2">
+                <input type="text" class="form-control" placeholder="Звідки">
+            </div>
+            <div class="col-md-2">
+                <input type="text" class="form-control" placeholder="Куди">
+            </div>
+            <div class="col-md-3">
+                <select class="form-control">
+                    <option selected>🚙 Транспорт</option>
+                    <option>Авто</option>
+                    <option>Автобус</option>
+                    <option>Мотоцикл</option>
+                </select>
+            </div>
+            
+        </div>
+    </form>
+
+    {% for trip in booking %}
+        <div class="vehicle-card">
+            <div class="vehicle-info">
+                <div class="text-center">
+                    <i class="bi bi-car-front-fill fs-2"></i>
+                    <div class="route-time">{{ trip.start_time.time }}</div>
+                </div>
+
+                <div class="route-line"></div>
+
+                <div class="route-info text-center">
+                    <div>{{ trip.from_place }} → {{ trip.to_place }}</div>
+                    <div class="route-time">{{ trip.start_time.date }}</div>
+                    <div class="route-time">{{ trip.time }}</div>
+                </div>
+
+                <div class="route-line"></div>
+
+                <div class="text-center">
+                    <i class="bi bi-geo-alt-fill fs-2 text-danger"></i>
+                    <div class="route-time">{{ trip.end_time.time }}</div>
+                </div>
+            </div>
+
+            <!-- Інформація про водія та бронювання -->
+            <div class="driver-info">
+                <img src="https://i.pravatar.cc/300?img={{ user.id}}" alt="Driver" class="driver-img">
+                <div>
+                    <div><strong>{{ trip.vehicle.owner }}</strong></div>
+                    <div class="text-muted"><i class="fas fa-star text-warning"></i> 4.8 (120)</div>
+                </div>
+                <div class="ms-auto text-end">
+                    <div class="price">${{trip.price}}</div>
+                    <button class="book-btn">Оформити</button>
+                    <button class="details-btn">Детальніше</button>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+
+</div>
+{% endblock content %}

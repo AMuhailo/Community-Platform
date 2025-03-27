@@ -81,94 +81,6 @@ body{
     border-bottom: 2px solid rgba(74, 82, 192, 0.8);
 }
 
-.chat-container {
-    width: 600px;
-    height: 800px;
-    background: #fff;
-    border-radius: 10px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
-.chat-header {
-    background: #304c6b;
-    color: white;
-    padding: 15px;
-    text-align: center;
-    font-weight: bold;
-    display: flex;
-    flex-direction: column;
-}
-
-.chat-online{
-    text-align: center;
-    font-weight: lighter;
-}
-.chat-messages {
-    flex: 1;
-    padding: 10px;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-}
-.message {
-    max-width: 75%;
-    padding: 10px 15px;
-    border-radius: 15px;
-    margin-bottom: 10px;
-    word-wrap: break-word;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-.message.left {
-    background: #e9ecef;
-    align-self: flex-start;
-}
-.message.right {
-    background: #95afcc;
-    color: white;
-    align-self: flex-end;
-    flex-direction: row-reverse;
-}
-.message img {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-}
-.message-content {
-    display: flex;
-    flex-direction: column;
-}
-.sender-name {
-    font-weight: bold;
-    font-size: 0.85rem;
-}
-.timestamp {
-    font-size: 0.75rem;
-    color: #34335c;
-}
-.chat-footer {
-    padding: 10px;
-    background: #f1f1f1;
-    display: flex;
-    gap: 10px;
-}
-.chat-footer input {
-    flex: 1;
-    padding: 10px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-}
-.chat-footer button {
-    background: #007bff;
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 5px;
-}
-
 .profile-container {
     max-width: 900px;
     margin: auto;
@@ -205,4 +117,85 @@ body{
 }
 .event:last-child {
     border-bottom: none;
+}
+.container-custom {
+    max-width: 800px;
+    margin: 40px auto;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    padding: 20px;
+}
+.vehicle-card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 15px;
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+}
+.vehicle-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.vehicle-icon {
+    width: 50px;
+    height: 50px;
+}
+.route-line {
+    position: relative;
+    width: 3px;
+    background: #ccc;
+    height: 50px;
+    margin: 0 15px;
+    animation: pulse 2s infinite alternate;
+}
+@keyframes pulse {
+    0% { background: #ccc; }
+    100% { background: #007bff; }
+}
+.route-info {
+    flex-grow: 1;
+}
+.route-time {
+    font-size: 14px;
+    color: #666;
+}
+.driver-info {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+}
+.driver-img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+.price {
+    font-size: 18px;
+    font-weight: bold;
+    color: #28a745;
+}
+.book-btn, .details-btn {
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    transition: transform 0.2s ease-in-out;
+}
+.book-btn {
+    background: #007bff;
+    color: white;
+}
+.details-btn {
+    background: #ffc107;
+    color: black;
+}
+.book-btn:hover, .details-btn:hover {
+    transform: scale(1.05);
+}
+.filter-form input, .filter-form select {
+    border-radius: 5px;
 }
