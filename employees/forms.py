@@ -14,11 +14,11 @@ class UserCreateForm(forms.ModelForm):
         model = User
         fields = ['username','first_name','last_name','email']
         
-class ModeratorUpdateView(forms.ModelForm):
+class ProfileUpdateForm(forms.ModelForm):
     avatar = forms.FileField(required = False)
     number = forms.CharField(max_length = 20, required = False)
     age = forms.IntegerField(initial = 18)
-    bio = forms.CharField(widget = forms.Textarea)
+    bio = forms.CharField(widget = forms.Textarea, required=False)
     class Meta:
         model = User
         fields = ['avatar','first_name', 'last_name', 'email', 'number', 'age', 'bio']

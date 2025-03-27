@@ -1,0 +1,28 @@
+<img src="https://i.pravatar.cc/300?img={{ user.id}}" alt="profile-photo" class="profile-img">
+<a href = "{% url 'profile_update_url' request.user.username request.user.id %}" class="btn 
+    {% if user.profile.age and user.profile.number %}btn-primary text-white{% else %}btn-warning text-dark{% endif %}  btn-sm mt-2 w-50 ">
+    Update profile
+</a>
+<div class="mt-3">
+    <p><strong>Status:</strong> 
+        {% if user.is_member %}
+            Member
+        {% else %}
+            Moderator
+        {% endif %}</p>
+    <p><strong>Name:</strong> {{ user.get_full_name}}</p>
+    <p><strong>Email:</strong> {{ user.email}}</p>
+    <p><strong>Number:</strong> 
+        {% if not user.profile.number %}
+            Please update profile
+        {% else %}
+            {{ user.profile.number}}
+        {% endif %}
+    </p>
+    <p><strong>Age:</strong> 
+        {% if not user.profile.age  %}
+            Please update profile
+        {% else %}
+            {{ user.profile.age}}
+        {% endif %}</p>
+</div>

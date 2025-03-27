@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %} Profile {{ user.get_full_name}} {% endblock title %}
+{% block content %}
+<div class="container profile-container">
+    <div class="profile-card">
+        <div>
+            {% include "employees/include/profile_info.html" with user=user%}
+        </div>
+
+        <div class="flex-grow-1">
+            <h5 class="mb-3">Planned events:</h5>
+            <div class="events-container">
+                <div class="event">📅 <strong>14 Mar:</strong> Зустріч з командою</div>
+                <div class="event">📅 <strong>20 Mar:</strong> Вебінар про Django</div>
+                <div class="event">📅 <strong>25 Mar:</strong> Співбесіда на роботу</div>
+                <div class="event">📅 <strong>30 Mar:</strong> Хакатон</div>
+                <div class="event">📅 <strong>5 Jun:</strong> Презентація проекту</div>
+            </div>
+            <button class="btn btn-success btn-sm mt-3 w-100">Add events</button>
+        </div>
+    </div>
+</div>
+{% endblock content %}

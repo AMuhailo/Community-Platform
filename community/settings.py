@@ -78,13 +78,23 @@ TEMPLATES = [
         },
     },
 ]
-ASGI_APPLICATION = 'community.asgi.application'
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer"
-    },
-}
-# WSGI_APPLICATION = 'community.wsgi.application'
+# ASGI_APPLICATION = 'community.asgi.application'
+# CHANNEL_LAYERS = {
+#     "default": {
+#         "BACKEND": "channels.layers.InMemoryChannelLayer"
+#     },
+# }
+
+# CHANNEL_LAYERS = {
+#     "default": {
+#         "BACKEND": "channels_redis.core.RedisChannelLayer",
+#         "CONFIG": {
+#             "hosts": [(env("REDIS_URL"))],
+#         },
+#     },
+# }
+
+WSGI_APPLICATION = 'community.wsgi.application'
 
 
 # Database

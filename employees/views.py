@@ -1,9 +1,9 @@
 from random import randint
 from django.shortcuts import get_object_or_404, render
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.contrib.auth import get_user_model
 from django.views.generic import CreateView, ListView, UpdateView, DeleteView, DetailView, FormView, TemplateView
-from employees.forms import RegisterUserForm, UserCreateForm, ModeratorUpdateView
+from employees.forms import RegisterUserForm, UserCreateForm, ProfileUpdateForm
 from employees.models import Administrator, Profile, Moderator, Member
 
 # Create your views here.
@@ -21,6 +21,15 @@ class RegisterUser(CreateView):
         user.is_member = True
         user.save()
         return super().form_valid(form)
+    
+    
+class ProfileUser(DetailView):
+    model = User
+    context_object_name = 'user'
+    template_name = 'employees/profile.html'
+    
+    def get_object(self, queryset = ...):
+        return get_object_or_404(self.model, username = self.kwargs.get('username'))
     
 class ModeratorCreateView(CreateView):
     model = Moderator
@@ -46,16 +55,18 @@ class ModeratorListView(ListView):
     queryset = Moderator.objects.filter(user__user__is_moder = True)
     
 
-class ModeratorUpdateView(UpdateView):
+class ProfileUpdateView(UpdateView):
     model = User
-    template_name = 'employees/moder/moder_update.html'
-    context_object_name = 'moder'
-    form_class = ModeratorUpdateView
-    success_url = reverse_lazy("moder_url")
+    template_name = 'employees/profile_update.html'
+    context_object_name = 'user'
+    form_class = ProfileUpdateForm
     
     def get_object(self, queryset = ...):
         return get_object_or_404(User, username = self.kwargs.get('username'), id = self.kwargs.get('user_id'))
 
+    def get_success_url(self):
+        return reverse("profile_url", args = [self.request.user.username])
+    
     def get_initial(self):
         initial = super().get_initial()
         user = self.get_object()
