@@ -22,9 +22,9 @@
             <div class="col-md-4 car-section">
                 <h5>
                     {% if trip.vehicle.vehicle != 'bus' %}
-                        Car
+                    <i class="bi bi-car-front-fill fs-2"></i>
                     {% else %}
-                        Bus
+                        <i class="bi bi-bus-front-fill fs-2"></i>
                     {% endif %}
                 </h5>
                 <p><i class="fas fa-car"></i> {{  trip.vehicle.brand }}</p>

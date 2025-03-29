@@ -5,11 +5,13 @@
     {% for vehicle in vehicles %}
         <div class="vehicle-info">
             <div class="text-center">
+                <a href="{% url 'vehicle_update_url' vehicle.id %}" class='text-decoration-none text-dark'>
                 {% if vehicle.vehicle != 'bus' %}
                     <i class="bi bi-car-front-fill fs-2"></i>
                 {% else %}
                     <i class="bi bi-bus-front-fill fs-2"></i>
                 {% endif %}
+                </a>
             </div>
             <div class="route-line"></div>
             <div class="route-info text-center w-75">

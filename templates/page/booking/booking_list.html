@@ -6,29 +6,27 @@
     <h2 class="text-center mb-3">🚗 Доступні поїздки</h2>
 
     <!-- Форма фільтрації -->
-    <form class="filter-form mb-4">
+    <form class="filter-form mb-4" method='GET'>
         <div class="row">
             <div class="col-md-3">
-                <input type="date" class="form-control" placeholder="Дата">
+                <input type="date" class="form-control" name='date' placeholder="Дата">
             </div>
             <div class="col-md-2">
-                <input type="time" class="form-control">
+                <input type="time" name='time' class="form-control">
             </div>
             <div class="col-md-2">
-                <input type="text" class="form-control" placeholder="Звідки">
+                <input type="text" class="form-control"  name='from_place' placeholder="Звідки">
             </div>
             <div class="col-md-2">
-                <input type="text" class="form-control" placeholder="Куди">
+                <input type="text" class="form-control" name='to_place' placeholder="Куди">
             </div>
             <div class="col-md-3">
-                <select class="form-control">
-                    <option selected>🚙 Транспорт</option>
-                    <option>Авто</option>
-                    <option>Автобус</option>
-                    <option>Мотоцикл</option>
+                <select class="form-control" name='transport'>
+                    <option selected>car</option>
+                    <option>bus</option>
                 </select>
             </div>
-            
+            <input type='submit' value='Search' class='btn btn-sm btn-primary mt-2' >
         </div>
     </form>
 

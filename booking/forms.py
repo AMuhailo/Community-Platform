@@ -1,3 +1,4 @@
+from re import A
 from django import forms
 from django.utils import timezone
 from booking.models import Booking, Vehicle
@@ -18,10 +19,10 @@ class BookingForm(forms.ModelForm):
             'to_place':forms.TextInput(attrs = {
                 'class':"form-control",
             }),
-            'start_time':forms.TextInput(attrs = {
+            'start_time':forms.TimeInput(attrs = {
                 'class':"form-control",
             }),
-            'end_time':forms.TextInput(attrs = {
+            'end_time':forms.TimeInput(attrs = {
                 'class':"form-control",
             }),
         }
@@ -54,3 +55,5 @@ class VehicleForm(forms.ModelForm):
         request = kwargs.pop('request')
         super().__init__(*args, **kwargs)
         self.fields['vehicle'].queryset = Vehicle.objects.filter(owner = request.user.profile.member_user)
+        
+        
