@@ -1,0 +1,22 @@
+<a href = "{% url 'vehicle_create_url' %}" class="btn btn-outline-success btn-sm mt-2 w-100 ">
+    Add Transport
+</a>
+<div class="events-container">
+    {% for vehicle in vehicles %}
+        <div class="vehicle-info">
+            <div class="text-center">
+                {% if vehicle.vehicle != 'bus' %}
+                    <i class="bi bi-car-front-fill fs-2"></i>
+                {% else %}
+                    <i class="bi bi-bus-front-fill fs-2"></i>
+                {% endif %}
+            </div>
+            <div class="route-line"></div>
+            <div class="route-info text-center w-75">
+                <div>{{ vehicle.brand }}</div>
+                <div class="route-time">{{ vehicle.year}}</div>
+            </div>
+            <div class="route-line"></div>
+        </div>
+    {% endfor %}
+</div>

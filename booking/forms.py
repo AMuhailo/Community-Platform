@@ -3,10 +3,7 @@ from django.utils import timezone
 from booking.models import Booking, Vehicle
 
 class BookingForm(forms.ModelForm):
-    vehicle = forms.ModelChoiceField(queryset = Vehicle.objects.none(), widget = forms.Select(attrs={"class":'form-select'}))
-    brand = forms.CharField(max_length = 120, required = False, widget = forms.TextInput(attrs={"class":'form-control', 'placeholder':'Toyota, Audo, BMW....'}))
-    year = forms.IntegerField(required = False, widget = forms.TextInput(attrs={"class":'form-control', 'placeholder':'20017'}))
-    capacity = forms.IntegerField(required = False, widget = forms.NumberInput(attrs={"class":'form-control', 'placeholder':'Number of passenger seats'}))
+    vehicle = forms.ModelChoiceField(queryset = Vehicle.objects.none(), required=False, widget = forms.Select(attrs={"class":'form-select'}))
     class Meta:
         model = Booking
         fields = ['price','from_place','to_place','start_time','end_time']
@@ -27,6 +24,31 @@ class BookingForm(forms.ModelForm):
             'end_time':forms.TextInput(attrs = {
                 'class':"form-control",
             }),
+        }
+    def __init__(self, *args, **kwargs):
+        request = kwargs.pop('request')
+        super().__init__(*args, **kwargs)
+        self.fields['vehicle'].queryset = Vehicle.objects.filter(owner = request.user.profile.member_user)
+        
+class VehicleForm(forms.ModelForm):
+    class Meta:
+        model = Vehicle
+        exclude = ['owner']
+        widgets = {
+            'vehicle':forms.Select(attrs={
+                "class":'form-control'}),
+            'brand':forms.TextInput(attrs={
+                "class":'form-control', 
+                'placeholder':'Toyota, Audo, BMW....'}),
+            'year':forms.TextInput(attrs={
+                "class":'form-control', 
+                'placeholder':'2017'}),
+            'capacity':forms.NumberInput(attrs={
+                "class":'form-control', 
+                'placeholder':'Number of passenger seats'}),
+            'location':forms.TextInput(attrs={
+                "class":'form-control', 
+                'placeholder':'Your city'}),
         }
     def __init__(self, *args, **kwargs):
         request = kwargs.pop('request')
