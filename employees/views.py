@@ -1,4 +1,5 @@
 from random import randint
+from attr import has
 from django.http import Http404
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse_lazy, reverse
@@ -34,10 +35,18 @@ class ProfileUser(DetailView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
-        if self.get_object().profile.member_user.category == 'DR':
-            vehicles = self.get_object().profile.member_user.owner_vehicle.all()
-        context["vehicles"] = vehicles
+        user = self.get_object()
+        context["vehicles"] = []
+        context['moders'] = []
+        if self.request.user.is_administrator:
+            queryset = self.get_object().administrator.filter(user__username=user.username).first()
+            if queryset:
+                context['moders'] = queryset.moderator_admin.all()
+            
+        if hasattr(user, 'profile') and (hasattr(user.profile, 'member_user') or hasattr(user.profile,'moder_user')):
+            if user.profile.member_user.category == 'DR':
+                context["vehicles"] = user.profile.member_user.owner_vehicle.all()           
+                     
         return context
     
     

@@ -1,0 +1,39 @@
+{% for trip in trips %}
+        <div class="vehicle-card" id='vehicle-card'>
+            <div class="vehicle-info">
+                <div class="text-center">
+                    {% if trip.vehicle.vehicle != 'bus' %}
+                        <i class="bi bi-car-front-fill fs-2"></i>
+                    {% else %}
+                        <i class="bi bi-bus-front-fill fs-2"></i>
+                    {% endif %}
+                    <div class="route-time">{{ trip.start_time.time }}</div>
+                </div>
+                <div class="route-line"></div>
+                <div class="route-info text-center w-75">
+                    <div>{{ trip.from_place }} → {{ trip.to_place }}</div>
+                    <div class="route-time">{{ trip.start_time.date }}</div>
+                    <div class="route-time">{{ trip.time }}</div>
+                </div>
+
+                <div class="route-line"></div>
+                <div class="text-center">
+                    <i class="bi bi-geo-alt-fill fs-2 text-danger"></i>
+                    <div class="route-time">{{ trip.end_time.time }}</div>
+                </div>
+            </div>
+
+            <div class="driver-info">
+                <img src="https://i.pravatar.cc/300?img={{ trip.vehicle.owner.id}}" alt="Driver" class="driver-img">
+                <div>
+                    <div><strong>{{ trip.vehicle.owner }}</strong></div>
+                    <div class="text-muted"><i class="fas fa-star text-warning"></i> 4.8 (120)</div>
+                </div>
+                <div class="ms-auto text-end">
+                    <div class="price">${{trip.price}}</div>
+                    <button class="book-btn">Оформити</button>
+                    <a href="{{ trip.get_absolute_url }}" class="details-btn">Детальніше</a>
+                </div>
+            </div>
+        </div>
+    {% endfor %}

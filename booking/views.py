@@ -2,13 +2,15 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse_lazy, reverse
 from django.views.generic import ListView, DetailView, FormView, UpdateView, DeleteView, CreateView
-from django.db.models import Avg, Max, Min
-from django.db.models import Q
+from django.db.models import Avg, Max, Min, Q
+from django.contrib.auth import get_user_model
+from flask import request
 from booking.models import Vehicle, Booking
 from booking.forms import BookingForm, VehicleForm
-from booking.utils import FilterMixin
 
 # Create your views here.
+User = get_user_model()
+
 class SuccessMixin:
     def get_form_kwargs(self):
             kwargs = super().get_form_kwargs()
@@ -82,6 +84,11 @@ class VehicleListView(ListView):
     template_name = 'page/vehicle/vehicle_list.html'
     context_object_name = 'vehicles'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["user"] = get_object_or_404(User, self.request.user.username)
+        return context
+    
 class VehicleCreateView(SuccessMixin, CreateView):
     model = Vehicle
     form_class = VehicleForm

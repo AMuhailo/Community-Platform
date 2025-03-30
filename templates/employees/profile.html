@@ -9,36 +9,36 @@
         </div>
 
         <div class="flex-grow-1">
-            <h5 class="mb-3">Planned Route:</h5>
+            {% if vehicles %}
+                <h5 class="mb-3">Planned Route:</h5>
+            {% elif moders %}
+                <h5 class="mb-3">List Moderators:</h5>
+            {% endif %}
+           
             <div class="events-container">
-            {% for vehicle in vehicles %}
-                {% for trip in vehicle.vehicle_booking.all %}
-                    <div class="vehicle-info">
-                        <div class="text-center">
-                            {% if trip.vehicle.vehicle != 'bus' %}
-                                <i class="bi bi-car-front-fill fs-2"></i>
-                            {% else %}
-                                <i class="bi bi-bus-front-fill fs-2"></i>
-                            {% endif %}
-                            <div class="route-time">{{ trip.start_time.time }}</div>
-                        </div>
-                        <div class="route-line"></div>
-                        <div class="route-info text-center w-75">
-                            <div><a href="{% url 'booking_update_url' trip.id%}" class='text-decoration-none text-warning'>{{ trip.from_place }} → {{ trip.to_place }}</a></div>
-                            <div class="route-time">{{ trip.start_time.date }}</div>
-                            <div class="route-time">{{ trip.time }}</div>
-                        </div>
-        
-                        <div class="route-line"></div>
-                        <div class="text-center">
-                            <i class="bi bi-geo-alt-fill fs-2 text-danger"></i>
-                            <div class="route-time">{{ trip.end_time.time }}</div>
-                        </div>
-                    </div>
+            {% if vehicles %}
+                {% for vehicle in vehicles %}
+                    {% include "employees/include/booking_trips.html" with trips=vehicle.vehicle_booking.all%}
                 {% endfor %}
-            {% endfor %}
+            {% elif moders%}
+                <div class='d-flex flex-wrap'>
+                    {% for moder in moders %}
+                        <div class="col-md-4 driver-section">
+                            <a href="{% url 'profile_url' moder.user.user.username %}" class='text-decoration-none text-dark '>
+                                <img src="https://i.pravatar.cc/300?img={{ moder.id}}" alt="Driver" class="driver-img">
+                                <h5>{{moder.user.user.get_full_name}}</h5>
+                                <p><i class="fas fa-star text-warning"></i> 4.8 (120 відгуків)</p>
+                            </a>
+                        </div>          
+                    {% endfor %}
+                </div>
+            {% endif %}
             </div>
-            <a href="{% url 'booking_create_url' %}" class="btn btn-success btn-sm mt-3 w-100">Add events</a>
+            {% if vehicles and request.user.is_moder%}
+                <a href="{% url 'booking_create_url' %}" class="btn btn-success btn-sm mt-3 w-100">Add events</a>
+            {% elif moders and request.user.is_administrator%}
+                <a href="{% url 'moder_create_url' %}" class="btn btn-success btn-sm mt-3 w-100">Add moderators</a>
+            {% endif %}
         </div>
     </div>
 </div>

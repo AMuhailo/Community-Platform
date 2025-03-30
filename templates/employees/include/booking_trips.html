@@ -1,0 +1,30 @@
+{% for trip in trips %}
+    <div class="vehicle-info">
+        <div class="text-center">
+            {% if trip.vehicle.vehicle != 'bus' %}
+                <i class="bi bi-car-front-fill fs-2"></i>
+            {% else %}
+                <i class="bi bi-bus-front-fill fs-2"></i>
+            {% endif %}
+            <div class="route-time">{{ trip.start_time.time }}</div>
+        </div>
+        <div class="route-line"></div>
+        <div class="route-info text-center w-75">
+            <div>
+                {% if trip.vehicle.owner == request.user.profile.member_user%}
+                    <a href="{% url 'booking_update_url' trip.id%}" class='text-decoration-none text-warning'>{{ trip.from_place }} → {{ trip.to_place }}</a>
+                {% else %}
+                    {{ trip.from_place }} → {{ trip.to_place }}
+                {% endif %}
+            </div>
+            <div class="route-time">{{ trip.start_time.date }}</div>
+            <div class="route-time">{{ trip.time }}</div>
+        </div>
+
+        <div class="route-line"></div>
+        <div class="text-center">
+            <i class="bi bi-geo-alt-fill fs-2 text-danger"></i>
+            <div class="route-time">{{ trip.end_time.time }}</div>
+        </div>
+    </div>
+{% endfor %}
