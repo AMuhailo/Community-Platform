@@ -16,7 +16,7 @@
             {% endif %}
            
             <div class="events-container">
-            {% if vehicles %}
+            {% if vehicles and request.user.profile.member_user.category == 'DR' %}
                 {% for vehicle in vehicles %}
                     {% include "employees/include/booking_trips.html" with trips=vehicle.vehicle_booking.all%}
                 {% endfor %}
@@ -34,10 +34,12 @@
                 </div>
             {% endif %}
             </div>
-            {% if vehicles and request.user.is_moder%}
-                <a href="{% url 'booking_create_url' %}" class="btn btn-success btn-sm mt-3 w-100">Add events</a>
-            {% elif moders and request.user.is_administrator%}
+            {% if request.user.is_administrator %}
                 <a href="{% url 'moder_create_url' %}" class="btn btn-success btn-sm mt-3 w-100">Add moderators</a>
+            {% elif request.user.profile.member_user.category == "DR" %}
+                <a href="{% url 'booking_create_url' %}" class="btn btn-success btn-sm mt-3 w-100">Add events</a>
+            {% else %}
+                <a href="{% url 'booking_list_url' %}" class="btn btn-success btn-sm mt-3 w-100">Search trips</a>
             {% endif %}
         </div>
     </div>

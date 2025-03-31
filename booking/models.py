@@ -3,7 +3,7 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from django.urls import reverse
-from employees.models import Member
+from employees.models import Profile
 # Create your models here.
 
 User = get_user_model()
@@ -18,7 +18,7 @@ class Vehicle(models.Model):
     year = models.PositiveSmallIntegerField(default = timezone.now().year)
     capicity = models.PositiveSmallIntegerField(default = 2)
     location = models.CharField(max_length = 120, blank = True, null = True)
-    owner = models.ForeignKey(Member, on_delete = models.CASCADE, related_name = 'owner_vehicle')
+    owner = models.ForeignKey(Profile, on_delete = models.CASCADE, related_name = 'owner_vehicle')
     
     class Meta:
         ordering = ['-year']

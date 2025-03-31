@@ -96,7 +96,7 @@ class VehicleCreateView(SuccessMixin, CreateView):
     
     def form_valid(self, form):
         new_vehicle = form.save(commit=False)
-        new_vehicle.owner = self.request.user.profile.member_user   
+        new_vehicle.owner = self.request.user.profile
         new_vehicle.save()
         return super().form_valid(form)
 

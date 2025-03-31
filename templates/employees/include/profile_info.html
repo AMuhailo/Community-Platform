@@ -1,32 +1,34 @@
-<img src="https://i.pravatar.cc/300?img={{ user.id}}" alt="profile-photo" class="profile-img">
-{% if requesr.user.username == user.username %}
-<a href = "{% url 'profile_update_url' request.user.username request.user.id %}" class="btn 
-    {% if user.profile.age and user.profile.number %}btn-primary text-white{% else %}btn-warning text-dark{% endif %}  btn-sm mt-2 w-50 ">
-    Update profile
-</a>
-{% endif %}
-<div class="mt-3">
-    {% if user.profile.member_user.category %}
-        <p><strong>Status:</strong> 
-            {{ user.profile.member_user.category}}
-        </p> 
+{% with profile=user.profile %}
+    <img src="https://i.pravatar.cc/300?img={{ user_pk.id}}" alt="profile-photo" class="profile-img">
+    {% if request.user.username == user.username %}
+    <a href = "{% url 'profile_update_url' request.user.username request.user.id %}" class="btn 
+        {% if profile.age and profile.number %}btn-primary text-white{% else %}btn-warning text-dark{% endif %}  btn-sm mt-2 w-50 ">
+        Update profile
+    </a>
     {% endif %}
-    <p><strong>Name:</strong> {{ user.get_full_name}}</p>
-    <p><strong>Email:</strong> {{ user.email}}</p>
-    <p><strong>Number:</strong> 
-        {% if not user.profile.number %}
-            Please update profile
-        {% else %}
-            {{ user.profile.number}}
+    <div class="mt-3">
+        {% if profile.member_user.category %}
+            <p><strong>Status:</strong> 
+                <a href="{% url 'category_update_url' profile.member_user.id %}" class='text-decoration-none'>{{ profile.member_user.category}}</a>
+            </p> 
         {% endif %}
-    </p>
-    <p>
-        <strong>Age:</strong> 
-        {% if not user.profile.age  %}
-            Please update profile
-        {% else %}
-            {{ user.profile.age}}
-        {% endif %}
-    </p>
-    {% include "page/vehicle/vehicle_list.html" %}
-</div>
+        <p><strong>Name:</strong> {{ user.get_full_name}}</p>
+        <p><strong>Email:</strong> {{ user.email}}</p>
+        <p><strong>Number:</strong> 
+            {% if not profile.number %}
+                Please update profile
+            {% else %}
+                {{ profile.number}}
+            {% endif %}
+        </p>
+        <p>
+            <strong>Age:</strong> 
+            {% if not profile.age  %}
+                Please update profile
+            {% else %}
+                {{ profile.age}}
+            {% endif %}
+        </p>
+        {% include "page/vehicle/vehicle_list.html" %}
+    </div>
+{% endwith %}

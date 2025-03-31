@@ -29,7 +29,7 @@ class BookingForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         request = kwargs.pop('request')
         super().__init__(*args, **kwargs)
-        self.fields['vehicle'].queryset = Vehicle.objects.filter(owner = request.user.profile.member_user)
+        self.fields['vehicle'].queryset = Vehicle.objects.filter(owner = request.user.profile)
         
 class VehicleForm(forms.ModelForm):
     class Meta:
@@ -54,6 +54,6 @@ class VehicleForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         request = kwargs.pop('request')
         super().__init__(*args, **kwargs)
-        self.fields['vehicle'].queryset = Vehicle.objects.filter(owner = request.user.profile.member_user)
+        self.fields['vehicle'].queryset = Vehicle.objects.filter(owner = request.user.profile)
         
         

@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import get_user_model
-from employees.models import Moderator, Profile
+from employees.models import Moderator, Profile, Member
 User = get_user_model()
 
 class RegisterUserForm(UserCreationForm):    
@@ -23,4 +23,7 @@ class ProfileUpdateForm(forms.ModelForm):
         model = User
         fields = ['avatar','first_name', 'last_name', 'email', 'number', 'age', 'bio']
 
-        
+class CategoryUpdateForm(forms.ModelForm):
+    class Meta:
+        model = Member
+        fields = ['category']

@@ -1,11 +1,11 @@
-from random import randint
-from attr import has
+from random import choice, randint
 from django.http import Http404
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse_lazy, reverse
 from django.contrib.auth import get_user_model
+from django.core.mail import send_mail
 from django.views.generic import CreateView, ListView, UpdateView, DeleteView, DetailView, FormView, TemplateView
-from employees.forms import RegisterUserForm, UserCreateForm, ProfileUpdateForm
+from employees.forms import CategoryUpdateForm, RegisterUserForm, UserCreateForm, ProfileUpdateForm
 from employees.models import Administrator, Profile, Moderator, Member
 
 # Create your views here.
@@ -45,10 +45,10 @@ class ProfileUser(DetailView):
             
         if hasattr(user, 'profile') and (hasattr(user.profile, 'member_user') or hasattr(user.profile,'moder_user')):
             if user.profile.member_user.category == 'DR':
-                context["vehicles"] = user.profile.member_user.owner_vehicle.all()           
-                     
+                context["vehicles"] = user.profile.owner_vehicle.all()           
+        context['user_pk'] = user             
         return context
-    
+
     
 class ModeratorCreateView(CreateView):
     model = Moderator
@@ -116,3 +116,17 @@ class MemberListView(ListView):
     context_object_name = 'members'
     template_name = 'employees/member/member_list.html'
     queryset = Member.objects.filter(user__user__is_member = True)
+
+
+class CategoryUpdateView(UpdateView):
+    model = Member
+    template_name = 'employees/profile_update.html'
+    context_object_name = 'category'
+    form_class = CategoryUpdateForm
+    
+    def get_object(self, queryset = ...):
+        return get_object_or_404(Member, id = self.kwargs.get('member_id'))
+    
+    def get_success_url(self):
+        return reverse("profile_url", args = [self.request.user.username])
+    

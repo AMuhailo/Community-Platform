@@ -1,34 +1,36 @@
-{% if request.user.username == user.username %}
-<a href = "{% url 'vehicle_create_url' %}" class="btn btn-outline-success btn-sm mt-2 w-100 ">
-    Add Transport
-</a>
-{% endif %}
-<div class="events-container">
-    {% for vehicle in vehicles %}
-        <div class="vehicle-info">
-            <div class="text-center">
-                {% if vehicle.owner == request.user.profile.member_user %}
-                    <a href="{% url 'vehicle_update_url' vehicle.id %}" class='text-decoration-none text-dark'>
+{% with user_r=request.user %}
+    {% if user_r.username == user.username and user_r.profile.member_user.category == 'DR' %}
+        <a href = "{% url 'vehicle_create_url' %}" class="btn btn-outline-success btn-sm mt-2 w-100 ">
+            Add Transport
+        </a>
+    {% endif %}
+    <div class="events-container">
+        {% for vehicle in vehicles %}
+            <div class="vehicle-info">
+                <div class="text-center">
+                    {% if vehicle.owner == profile %}
+                        <a href="{% url 'vehicle_update_url' vehicle.id %}" class='text-decoration-none text-dark'>
+                            {% if vehicle.vehicle != 'bus' %}
+                                <i class="bi bi-car-front-fill fs-2"></i>
+                            {% else %}
+                                <i class="bi bi-bus-front-fill fs-2"></i>
+                            {% endif %}
+                        </a>
+                    {% else%}
                         {% if vehicle.vehicle != 'bus' %}
                             <i class="bi bi-car-front-fill fs-2"></i>
                         {% else %}
                             <i class="bi bi-bus-front-fill fs-2"></i>
                         {% endif %}
-                    </a>
-                {% else%}
-                    {% if vehicle.vehicle != 'bus' %}
-                        <i class="bi bi-car-front-fill fs-2"></i>
-                    {% else %}
-                        <i class="bi bi-bus-front-fill fs-2"></i>
                     {% endif %}
-                {% endif %}
+                </div>
+                <div class="route-line"></div>
+                <div class="route-info text-center w-75">
+                    <div>{{ vehicle.brand }}</div>
+                    <div class="route-time">{{ vehicle.year}}</div>
+                </div>
+                <div class="route-line"></div>
             </div>
-            <div class="route-line"></div>
-            <div class="route-info text-center w-75">
-                <div>{{ vehicle.brand }}</div>
-                <div class="route-time">{{ vehicle.year}}</div>
-            </div>
-            <div class="route-line"></div>
-        </div>
-    {% endfor %}
-</div>
+        {% endfor %}
+    </div>
+{% endwith %}
