@@ -11,7 +11,7 @@
         <div class="route-line"></div>
         <div class="route-info text-center w-75">
             <div>
-                {% if trip.vehicle.owner == request.user.profile.member_user%}
+                {% if trip.vehicle.owner == request.user.profile%}
                     <a href="{% url 'booking_update_url' trip.id%}" class='text-decoration-none text-warning'>{{ trip.from_place }} → {{ trip.to_place }}</a>
                 {% else %}
                     {{ trip.from_place }} → {{ trip.to_place }}

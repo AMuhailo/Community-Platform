@@ -2,7 +2,7 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse_lazy, reverse
 from django.views.generic import ListView, DetailView, FormView, UpdateView, DeleteView, CreateView
-from django.db.models import Avg, Max, Min, Q
+from django.db.models import Avg, Min, F, Count
 from django.contrib.auth import get_user_model
 from flask import request
 from booking.models import Review, Vehicle, Booking
@@ -28,7 +28,14 @@ class BookingListView(ListView):
     context_object_name = 'trips'
     template_name = 'page/booking/booking_list.html'
     def get_queryset(self):
-        queryset = Booking.objects.annotate(time = Min('end_time') - Min('start_time')).filter(status = 'complete').order_by('vehicle__owner__user__review_reviewer')
+        queryset = Booking.objects.annotate(time = F('end_time') - F('start_time'), 
+                                            average_rating=Avg('vehicle__owner__user__profile__user__review_received__rating'), 
+                                            review_count=Count('vehicle__owner__user__profile__user__review_received'))\
+                                            .filter(status = 'complete')\
+                                            .select_related('vehicle',
+                                                            'vehicle__owner',
+                                                            'vehicle__owner__user',
+                                                            'vehicle__owner__user__profile')
         self.date = self.request.GET.get('date')
         self.time = self.request.GET.get('time')
         self.from_place = self.request.GET.get('from_place')
@@ -53,7 +60,14 @@ class BookingDetailView(DetailView):
     template_name = 'page/booking/booking_detail.html'
     
     def get_object(self, queryset = ...):
-        queryset = Booking.objects.annotate(time = Min('end_time') - Min('start_time'))
+        queryset = Booking.objects.annotate(time = F('end_time') - F('start_time'), 
+                                            average_rating=Avg('vehicle__owner__user__profile__user__review_received__rating'), 
+                                            review_count=Count('vehicle__owner__user__profile__user__review_received'))\
+                                            .filter(status = 'complete')\
+                                            .select_related('vehicle',
+                                                            'vehicle__owner',
+                                                            'vehicle__owner__user',
+                                                            'vehicle__owner__user__profile')
         return get_object_or_404(queryset, id = self.kwargs.get('booking_number'))
 
 
@@ -79,15 +93,17 @@ class BookingUpdateView(SuccessMixin, UpdateView):
         queryset = Booking.objects.annotate(time = Min('end_time') - Min('start_time'))
         return get_object_or_404(queryset, id = self.kwargs.get('booking_number'))
 
+
 class VehicleListView(ListView):
     model = Vehicle
     template_name = 'page/vehicle/vehicle_list.html'
     context_object_name = 'vehicles'
-
+    queryset = Vehicle.objects.all().select_related('user','user__profile','user__profile__member_user')
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["user"] = get_object_or_404(User, self.request.user.username)
         return context
+    
     
 class VehicleCreateView(SuccessMixin, CreateView):
     model = Vehicle

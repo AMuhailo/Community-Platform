@@ -27,7 +27,8 @@ urlpatterns = [
     path('logout/', LogoutView.as_view(), name = 'logout'),
     path('admin/', admin.site.urls),
     path('employees/',include('employees.urls')),
-    path('booking/',include('booking.urls'))
+    path('booking/',include('booking.urls')),
+    path('__debug__/', include('debug_toolbar.urls'))
 ]
 
 if settings.DEBUG:

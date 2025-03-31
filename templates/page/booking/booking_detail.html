@@ -11,8 +11,8 @@
                     <h5>{{ owner }}</h5>
                 </a>
                 <p><i class="bi bi-star-fill text-warning"></i> 
-                    {{ owner.user.profile.user.get_average_rating }} 
-                    ({{ owner.user.profile.user.get_review_count }})
+                    {{ trip.average_rating|floatformat:1 }} 
+                    ({{ trip.review_count }})
                 </p>
             </div>
 

@@ -29,8 +29,8 @@
             <div>
                 <div><strong>{{ vehicle_t.owner }}</strong></div>
                 <div class="text-muted"><i class="bi bi-star-fill text-warning"></i> 
-                    {{ vehicle_t.owner.user.profile.user.get_average_rating }} 
-                    ({{ vehicle_t.owner.user.profile.user.get_review_count }})
+                    {{ trip.average_rating|floatformat:1 }} 
+                    ({{ trip.review_count }})
                 </div>
             </div>
             <div class="ms-auto text-end">
