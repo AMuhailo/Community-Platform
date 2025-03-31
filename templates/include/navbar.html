@@ -1,6 +1,6 @@
 <nav class="navbar bg-info-subtle border-bottom border-body" data-bs-theme="dark">
     <div class="container-lg">
-        <a class="navbar-brand" href="#"><i class="bi bi-dropbox"></i> Warehome</a>
+        <a class="navbar-brand" href="{% url 'booking_list_url'%}"><i class="bi bi-dropbox"></i> Bookings</a>
         <div class='d-flex ms-auto align-items-center'>
         {% if request.user.is_authenticated %}
             <span class="navbar-text text-white me-5">

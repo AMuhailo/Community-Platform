@@ -7,7 +7,6 @@
         <div>
             {% include "employees/include/profile_info.html" with user=user%}
         </div>
-
         <div class="flex-grow-1">
             {% if vehicles %}
                 <h5 class="mb-3">Planned Route:</h5>
@@ -22,15 +21,7 @@
                 {% endfor %}
             {% elif moders%}
                 <div class='d-flex flex-wrap'>
-                    {% for moder in moders %}
-                        <div class="col-md-4 driver-section">
-                            <a href="{% url 'profile_url' moder.user.user.username %}" class='text-decoration-none text-dark '>
-                                <img src="https://i.pravatar.cc/300?img={{ moder.id}}" alt="Driver" class="driver-img">
-                                <h5>{{moder.user.user.get_full_name}}</h5>
-                                <p><i class="fas fa-star text-warning"></i> 4.8 (120 відгуків)</p>
-                            </a>
-                        </div>          
-                    {% endfor %}
+                    {% include "employees/moder/moder_list.html" with moders=moders%}
                 </div>
             {% endif %}
             </div>

@@ -1,7 +1,6 @@
-from re import A
 from django import forms
 from django.utils import timezone
-from booking.models import Booking, Vehicle
+from booking.models import Booking, Vehicle, Review
 
 class BookingForm(forms.ModelForm):
     vehicle = forms.ModelChoiceField(queryset = Vehicle.objects.none(), required=False, widget = forms.Select(attrs={"class":'form-select'}))
@@ -55,5 +54,8 @@ class VehicleForm(forms.ModelForm):
         request = kwargs.pop('request')
         super().__init__(*args, **kwargs)
         self.fields['vehicle'].queryset = Vehicle.objects.filter(owner = request.user.profile)
-        
-        
+    
+class ReviewForm(forms.ModelForm):
+    class Meta:
+        model = Review
+        fields = ['rating','comment']

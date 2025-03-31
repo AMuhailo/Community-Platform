@@ -3,6 +3,8 @@
     {{ form.as_p }}
     {% if category %}
         <input type='submit' class='btn btn-sm btn-primary' value='Updated category'>
+    {% elif review%}
+        <input type='submit' class='btn btn-sm btn-primary' value='Add review'>
     {% else %}
         <input type='submit' value='Updated profile'>
     {% endif %}

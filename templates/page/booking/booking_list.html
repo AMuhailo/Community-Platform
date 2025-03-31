@@ -2,10 +2,7 @@
 {% load static %}
 {% block content %}
 <div class="container-custom">
-    <!-- Шапка списку -->
     <h2 class="text-center mb-3">🚗 Доступні поїздки</h2>
-
-    <!-- Форма фільтрації -->
     <form class="filter-form mb-4" hx-get="{% url 'booking_list_url'%}" hx-target="body">
         <div class="row">
             <div class="col-md-3">
@@ -29,9 +26,6 @@
             <input type='submit' value='Search' class='btn btn-sm btn-primary mt-2' >
         </div>
     </form>
-    
     {% include "page/partials/vehicle-card.html" with trips=trips%}
-
-    
 </div>
 {% endblock content %}

@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth import get_user_model
+from django.db.models import Avg, Count
 from django.contrib.auth.models import AbstractUser
 # Create your models here.
 
@@ -8,6 +9,15 @@ class User(AbstractUser):
     is_moder = models.BooleanField(default = False)
     is_member = models.BooleanField(default = False)
     
+    def get_average_rating(self):
+        ratings = self.review_received.aggregate(average_rating = Avg('rating'))['average_rating']
+        return round(ratings, 1) if ratings else 0
+    
+    def get_review_count(self):
+        rating_count = self.review_received.count()
+        return rating_count
+
+
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete = models.CASCADE, related_name = 'profile')

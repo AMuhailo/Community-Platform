@@ -1,5 +1,5 @@
 from django.contrib import admin
-from booking.models import Vehicle, Booking
+from booking.models import Vehicle, Booking, Review
 
 # Register your models here.
 
@@ -11,3 +11,4 @@ class VehicleAdmin(admin.ModelAdmin):
     list_editable = ['year','location','capicity']
     
 admin.site.register(Booking)
+admin.site.register(Review)

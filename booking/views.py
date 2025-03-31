@@ -5,8 +5,8 @@ from django.views.generic import ListView, DetailView, FormView, UpdateView, Del
 from django.db.models import Avg, Max, Min, Q
 from django.contrib.auth import get_user_model
 from flask import request
-from booking.models import Vehicle, Booking
-from booking.forms import BookingForm, VehicleForm
+from booking.models import Review, Vehicle, Booking
+from booking.forms import BookingForm, VehicleForm, ReviewForm
 
 # Create your views here.
 User = get_user_model()
@@ -28,7 +28,7 @@ class BookingListView(ListView):
     context_object_name = 'trips'
     template_name = 'page/booking/booking_list.html'
     def get_queryset(self):
-        queryset = Booking.objects.annotate(time = Min('end_time') - Min('start_time')).all()
+        queryset = Booking.objects.annotate(time = Min('end_time') - Min('start_time')).filter(status = 'complete').order_by('vehicle__owner__user__review_reviewer')
         self.date = self.request.GET.get('date')
         self.time = self.request.GET.get('time')
         self.from_place = self.request.GET.get('from_place')
@@ -107,3 +107,18 @@ class VehicleUpdateView(SuccessMixin, UpdateView):
     
     def get_object(self):
         return get_object_or_404(Vehicle, id = self.kwargs.get('vehicle_number'))
+    
+class ReviewCreateView(CreateView):
+    model = Review
+    context_object_name = 'review'
+    template_name = 'employees/profile_update.html'
+    form_class = ReviewForm
+    def get_success_url(self):
+        return reverse("profile_url", args = [self.request.user.username])
+    def form_valid(self, form):
+        user = get_object_or_404(User, id=self.kwargs.get('user_pk'))
+        review = form.save(commit=False)
+        review.user = user
+        review.reviewer = self.request.user
+        review.save()
+        return super().form_valid(form)

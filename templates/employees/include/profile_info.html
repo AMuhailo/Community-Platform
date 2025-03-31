@@ -12,6 +12,15 @@
                 <a href="{% url 'category_update_url' profile.member_user.id %}" class='text-decoration-none'>{{ profile.member_user.category}}</a>
             </p> 
         {% endif %}
+        <p><strong>Rating</strong> 
+            {% if request.user.username == profile.user.username %}
+            <i class="bi bi-star-fill text-warning"></i>
+            {% else %}
+            <a href="{% url 'review_url' profile.user.id %}"><i class="bi bi-star-fill text-warning"></i></a>
+            {% endif %}
+            {{ profile.user.get_average_rating }} 
+            ({{ profile.user.get_review_count }})
+        </p>
         <p><strong>Name:</strong> {{ user.get_full_name}}</p>
         <p><strong>Email:</strong> {{ user.email}}</p>
         <p><strong>Number:</strong> 

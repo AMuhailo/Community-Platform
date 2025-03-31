@@ -1,13 +1,19 @@
 {% extends "base.html" %}
 
 {% block content %}
+    {% with owner=trip.vehicle.owner %}
     <div class="trip-details-container">
         <div class="row">
 
             <div class="col-md-4 driver-section">
-                <img src="https://i.pravatar.cc/300?img={{ trip.vehicle.owner.id}}" alt="Driver" class="driver-img">
-                <h5>{{ trip.vehicle.owner }}</h5>
-                <p><i class="fas fa-star text-warning"></i> 4.8 (120 відгуків)</p>
+                <a href="{% url 'profile_url' owner.user.username %}" class='text-decoration-none'>
+                    <img src="https://i.pravatar.cc/300?img={{ owner.id}}" alt="Driver" class="driver-img">
+                    <h5>{{ owner }}</h5>
+                </a>
+                <p><i class="bi bi-star-fill text-warning"></i> 
+                    {{ owner.user.profile.user.get_average_rating }} 
+                    ({{ owner.user.profile.user.get_review_count }})
+                </p>
             </div>
 
             <div class="col-md-4 route-section">
@@ -34,7 +40,8 @@
         </div>
 
         <div class="text-center mt-4">
-            <button class="book-btn">Make a reservation - ₴500</button>
+            <button class="book-btn">Make a reservation - ${{trip.price}}</button>
         </div>
     </div>
+    {% endwith %}
 {% endblock content %}

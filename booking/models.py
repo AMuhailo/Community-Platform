@@ -1,3 +1,4 @@
+from enum import unique
 import uuid
 from django.db import models
 from django.contrib.auth import get_user_model
@@ -29,7 +30,7 @@ class Vehicle(models.Model):
 class Booking(models.Model):
     STATUS_CHOICES = [
         ('pending', 'Pending'), 
-        ('confirmed', 'Confirmed'), 
+        ('complete', 'Complete'), 
         ('cancelled', 'Cancelled')
     ]
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -39,7 +40,7 @@ class Booking(models.Model):
     to_place = models.CharField(max_length = 120)
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
-    status = models.CharField(max_length = 10, choices = STATUS_CHOICES, blank = True, null = True)
+    status = models.CharField(max_length = 10, choices = STATUS_CHOICES, blank = True, null = True, default = 'complete')
 
     class Meta:
         ordering = ['-id','-start_time','end_time']
@@ -52,3 +53,17 @@ class Booking(models.Model):
     
     def __str__(self):
         return f"Booking №{self.id}"
+    
+    
+class Review(models.Model):
+    user = models.ForeignKey(User, on_delete = models.CASCADE, related_name = 'review_received')
+    reviewer = models.ForeignKey(User, on_delete = models.CASCADE, related_name = 'review_reviewer')
+    rating = models.PositiveIntegerField(default = 1)
+    comment = models.TextField(blank = True, null = True)
+    created = models.DateTimeField(auto_now_add = True)
+    
+    class Meta:
+        unique_together = ['user','reviewer']
+        
+    def __str__(self):
+        return f"{self.reviewer.username} => {self.user.username} {self.rating}"        
