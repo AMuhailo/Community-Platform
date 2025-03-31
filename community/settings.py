@@ -45,7 +45,8 @@ INSTALLED_APPS = [
     'django_htmx',
     'storages',
     'employees.apps.EmployeesConfig',
-    'booking.apps.BookingConfig'
+    'booking.apps.BookingConfig',
+    'orders.apps.OrdersConfig',
 ]
 
 
