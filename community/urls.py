@@ -28,6 +28,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('employees/',include('employees.urls')),
     path('booking/',include('booking.urls')),
+    path('orders/',include('orders.urls')),
     path('__debug__/', include('debug_toolbar.urls'))
 ]
 

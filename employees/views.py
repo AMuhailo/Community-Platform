@@ -1,5 +1,5 @@
 from random import choice, randint
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse_lazy, reverse
 from django.contrib.auth import get_user_model
@@ -39,14 +39,13 @@ class ProfileUser(DetailView):
         context["vehicles"] = []
         context['moders'] = []
         if self.request.user.is_administrator:
-            queryset = self.get_object().administrator.filter(user__username=user.username).first()
+            queryset = self.get_object().administrator.filter(user__username=user.username).first()      
             if queryset:
                 context['moders'] = queryset.moderator_admin.all()
             
         if hasattr(user, 'profile') and (hasattr(user.profile, 'member_user') or hasattr(user.profile,'moder_user')):
             if user.profile.member_user.category == 'DR':
-                context["vehicles"] = user.profile.owner_vehicle.all()           
-        context['user_pk'] = user             
+                context["vehicles"] = user.profile.owner_vehicle.all()
         return context
 
     
@@ -129,4 +128,22 @@ class CategoryUpdateView(UpdateView):
     
     def get_success_url(self):
         return reverse("profile_url", args = [self.request.user.username])
-    
+
+
+def change_category(request, user_pk):
+    user = User.objects.get(id = user_pk)
+    moders = Moderator.objects.values_list('user', flat = True)
+    print(moders)
+    if moders:
+        moder = User.objects.filter(id__in = moders)
+        if not moder.exists():
+            return "Not moder founded"
+        else:
+            email_moder = choice(moder)
+    url = reverse('category_update_url',args = [user.id])
+    user_url = request.build_absolute_uri(url)
+    subject = f"Change status"
+    messages = f"User {user.get_full_name()} wants to change status. My status {request.user.profile.member_user.category}\n"\
+                f"{user_url}"
+    send_mail(subject, messages , user.email, [email_moder.email])
+    return redirect('profile_url', request.user.username)

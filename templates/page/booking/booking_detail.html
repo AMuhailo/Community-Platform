@@ -40,7 +40,10 @@
         </div>
 
         <div class="text-center mt-4">
-            <button class="book-btn">Make a reservation - ${{trip.price}}</button>
+            <form action="{% url 'order_create_url' trip.id %}" method="POST">
+                {% csrf_token %}
+                <button class="book-btn" type='submit'>Make a reservation - ${{trip.price}}</button>
+            </form>
         </div>
     </div>
     {% endwith %}

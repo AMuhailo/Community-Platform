@@ -17,16 +17,38 @@ class Vehicle(models.Model):
     vehicle = models.CharField(max_length = 3, choices = VEHICLE_CHOICES , default = 'bus')
     brand = models.CharField(max_length = 120)
     year = models.PositiveSmallIntegerField(default = timezone.now().year)
-    capicity = models.PositiveSmallIntegerField(default = 2)
+    capicity = models.PositiveSmallIntegerField()
     location = models.CharField(max_length = 120, blank = True, null = True)
     owner = models.ForeignKey(Profile, on_delete = models.CASCADE, related_name = 'owner_vehicle')
     
     class Meta:
         ordering = ['-year']
     
+    def capacity_order(self, capacity):
+        if self.capicity >= capacity:
+            self.capicity -= capacity
+            self.save()
+            return True
+        elif self.capicity <=0 :
+            self.capicity = 0
+            self.vehicle.vehicle_booking.status = 'pending'   
+            self.save()
+            return True
+        return False  
+    
+    def capacity_plus(self, capacity):
+        if self.capicity >= 0:
+            self.capicity += capacity
+            self.save()
+            return True
+    
     def __str__(self):
         return f"{self.vehicle} {self.brand}"
 
+    
+    
+    
+    
 class Booking(models.Model):
     STATUS_CHOICES = [
         ('pending', 'Pending'), 

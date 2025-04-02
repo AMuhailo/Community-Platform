@@ -4,7 +4,8 @@ from django.urls import reverse_lazy, reverse
 from django.views.generic import ListView, DetailView, FormView, UpdateView, DeleteView, CreateView
 from django.db.models import Avg, Min, F, Count
 from django.contrib.auth import get_user_model
-from flask import request
+from datetime import datetime
+from django.utils import timezone
 from booking.models import Review, Vehicle, Booking
 from booking.forms import BookingForm, VehicleForm, ReviewForm
 
@@ -31,11 +32,12 @@ class BookingListView(ListView):
         queryset = Booking.objects.annotate(time = F('end_time') - F('start_time'), 
                                             average_rating=Avg('vehicle__owner__user__profile__user__review_received__rating'), 
                                             review_count=Count('vehicle__owner__user__profile__user__review_received'))\
-                                            .filter(status = 'complete')\
+                                            .filter(end_time__date__gte=timezone.now().date(),end_time__time__lte=timezone.now().time(), status='complete')\
                                             .select_related('vehicle',
                                                             'vehicle__owner',
                                                             'vehicle__owner__user',
                                                             'vehicle__owner__user__profile')
+        Booking.objects.filter(end_time__date__lte=timezone.now().date(), end_time__time__lte=timezone.now().time()).update(status = 'cancelled')
         self.date = self.request.GET.get('date')
         self.time = self.request.GET.get('time')
         self.from_place = self.request.GET.get('from_place')

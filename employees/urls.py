@@ -7,4 +7,5 @@ urlpatterns = [
     path('profile/<username>/', views.ProfileUser.as_view(), name = 'profile_url'),
     path('moder/update/<username>/<user_id>/', views.ProfileUpdateView.as_view(), name = 'profile_update_url'),
     path('<member_id>/category/', views.CategoryUpdateView.as_view(), name = 'category_update_url'),
+    path('change-category/<user_pk>',views.change_category, name = 'change_category_url')
 ]
