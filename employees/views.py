@@ -7,7 +7,8 @@ from django.core.mail import send_mail
 from django.views.generic import CreateView, ListView, UpdateView, DeleteView, DetailView, FormView, TemplateView
 from employees.forms import CategoryUpdateForm, RegisterUserForm, UserCreateForm, ProfileUpdateForm
 from employees.models import Administrator, Profile, Moderator, Member
-
+from employees.tasks import category_task
+from orders.utils import order_completed
 # Create your views here.
 User = get_user_model()
 
@@ -42,7 +43,10 @@ class ProfileUser(DetailView):
             queryset = self.get_object().administrator.filter(user__username=user.username).first()      
             if queryset:
                 context['moders'] = queryset.moderator_admin.all()
-            
+        if self.request.user.is_member:
+            orders = user.order_user.filter(user = user)
+            order_completed(orders)
+            context['orders'] = orders
         if hasattr(user, 'profile') and (hasattr(user.profile, 'member_user') or hasattr(user.profile,'moder_user')):
             if user.profile.member_user.category == 'DR':
                 context["vehicles"] = user.profile.owner_vehicle.all()
@@ -132,18 +136,7 @@ class CategoryUpdateView(UpdateView):
 
 def change_category(request, user_pk):
     user = User.objects.get(id = user_pk)
-    moders = Moderator.objects.values_list('user', flat = True)
-    print(moders)
-    if moders:
-        moder = User.objects.filter(id__in = moders)
-        if not moder.exists():
-            return "Not moder founded"
-        else:
-            email_moder = choice(moder)
-    url = reverse('category_update_url',args = [user.id])
-    user_url = request.build_absolute_uri(url)
-    subject = f"Change status"
-    messages = f"User {user.get_full_name()} wants to change status. My status {request.user.profile.member_user.category}\n"\
-                f"{user_url}"
-    send_mail(subject, messages , user.email, [email_moder.email])
+    
+    profile = request.user.profile
+    category_task.delay(user.id, profile.id)
     return redirect('profile_url', request.user.username)

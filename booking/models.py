@@ -74,7 +74,7 @@ class Booking(models.Model):
     
     
     def __str__(self):
-        return f"Booking №{self.id}"
+        return f"Booking №{str(self.id)[:4]}"
     
     
 class Review(models.Model):

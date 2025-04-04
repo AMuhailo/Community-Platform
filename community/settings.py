@@ -133,6 +133,12 @@ USE_I18N = True
 
 USE_TZ = True
 
+#Celery
+CELERY_BROKER_URL = env('REDIS_URL')
+CELERY_TIMEZONE = "UTC"
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60
+CELERY_BROCKER_CONNECTION_RETRY_ON_STARTUP = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/

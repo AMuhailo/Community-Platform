@@ -23,6 +23,8 @@
                 <div class='d-flex flex-wrap'>
                     {% include "employees/moder/moder_list.html" with moders=moders%}
                 </div>
+            {% else %}
+                {% include "page/orders/orders_list.html" with orders=orders%}
             {% endif %}
             </div>
             {% if request.user.is_administrator %}

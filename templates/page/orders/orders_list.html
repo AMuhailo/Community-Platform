@@ -1,0 +1,33 @@
+{% for trip in orders %}
+    {% with booking=trip.booking %}
+    <div class="vehicle-info">
+        <div class="text-center">
+            {% if booking.vehicle.vehicle != 'bus' %}
+                <i class="bi bi-car-front-fill fs-2"></i>
+            {% else %}
+                <i class="bi bi-bus-front-fill fs-2"></i>
+            {% endif %}
+            <div class="route-time">{{ booking.start_time.time }}</div>
+        </div>
+        <div class="route-line"></div>
+        <div class="route-info text-center w-75">
+            <div>
+                {% if booking.vehicle.owner == request.user.profile%}
+                    <a href="{% url 'booking_update_url' booking.id%}" class='text-decoration-none text-warning'>{{ trip.from_place }} → {{ trip.to_place }}</a>
+                {% else %}
+                    {{ booking.from_place }} → {{ booking.to_place }}
+                {% endif %}
+            </div>
+            <div class="route-time">{{ booking.start_time.date }}</div>
+            <div class="route-time">{{ booking.time }}</div>
+        </div>
+
+        <div class="route-line"></div>
+        <div class="text-center">
+            <div class="route-time"><a class='text-decoration-none' href="{% url 'order_cancel_url' trip.id%}"><i class="bi bi-x fs-3"></i></a></div>
+            <i class="bi bi-geo-alt-fill fs-2 text-danger"></i>
+            <div class="route-time">{{ booking.end_time.time }}</div>
+        </div>
+    </div>
+    {% endwith %}
+{% endfor %}

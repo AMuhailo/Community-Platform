@@ -2,13 +2,12 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse_lazy, reverse
 from django.views.generic import ListView, DetailView, FormView, UpdateView, DeleteView, CreateView
-from django.db.models import Avg, Min, F, Count
+from django.db.models import Avg, Min, F, Count, Q
 from django.contrib.auth import get_user_model
-from datetime import datetime
 from django.utils import timezone
 from booking.models import Review, Vehicle, Booking
 from booking.forms import BookingForm, VehicleForm, ReviewForm
-
+from booking.utils import trips_over
 # Create your views here.
 User = get_user_model()
 
@@ -32,12 +31,14 @@ class BookingListView(ListView):
         queryset = Booking.objects.annotate(time = F('end_time') - F('start_time'), 
                                             average_rating=Avg('vehicle__owner__user__profile__user__review_received__rating'), 
                                             review_count=Count('vehicle__owner__user__profile__user__review_received'))\
-                                            .filter(end_time__date__gte=timezone.now().date(),end_time__time__lte=timezone.now().time(), status='complete')\
+                                            .filter(status='complete',end_time__date__gte=timezone.now().date(),end_time__time__lte=timezone.now().time())\
                                             .select_related('vehicle',
                                                             'vehicle__owner',
                                                             'vehicle__owner__user',
                                                             'vehicle__owner__user__profile')
         Booking.objects.filter(end_time__date__lte=timezone.now().date(), end_time__time__lte=timezone.now().time()).update(status = 'cancelled')
+        over = Booking.objects.filter(end_time__date__lte=timezone.now().date(), end_time__time__lte=timezone.now().time(), status = 'cancelled').values_list('id', flat=True)
+        trips_over(booking_ids = over)
         self.date = self.request.GET.get('date')
         self.time = self.request.GET.get('time')
         self.from_place = self.request.GET.get('from_place')
@@ -95,7 +96,16 @@ class BookingUpdateView(SuccessMixin, UpdateView):
         queryset = Booking.objects.annotate(time = Min('end_time') - Min('start_time'))
         return get_object_or_404(queryset, id = self.kwargs.get('booking_number'))
 
-
+class BookingDeleteView(DeleteView):
+    model = Booking
+    context_object_name = 'trip'
+    template_name = 'page/booking/booking_update.html'
+    def get_object(self, queryset = ...):
+        queryset = Booking.objects.annotate(time = Min('end_time') - Min('start_time'))
+        return get_object_or_404(queryset, id = self.kwargs.get('booking_number'))
+    def get_success_url(self):
+        return reverse_lazy('profile_url', args = [self.request.user.username])
+    
 class VehicleListView(ListView):
     model = Vehicle
     template_name = 'page/vehicle/vehicle_list.html'

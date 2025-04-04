@@ -23,6 +23,7 @@
 
         <div class="route-line"></div>
         <div class="text-center">
+            <div class="route-time"><a class='text-decoration-none' href="{% url 'booking_delete_url' trip.id%}"><i class="bi bi-x fs-3"></i></a></div>
             <i class="bi bi-geo-alt-fill fs-2 text-danger"></i>
             <div class="route-time">{{ trip.end_time.time }}</div>
         </div>
