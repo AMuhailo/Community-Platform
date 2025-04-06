@@ -14,15 +14,19 @@ class BookingForm(forms.ModelForm):
             }),
             'from_place':forms.TextInput(attrs = {
                 'class':"form-control",
+                'id':'from_place',
             }),
             'to_place':forms.TextInput(attrs = {
                 'class':"form-control",
+                'id':'to_place',
             }),
-            'start_time':forms.TimeInput(attrs = {
+            'start_time':forms.DateInput(attrs = {
                 'class':"form-control",
+                'id':'start_time',
             }),
-            'end_time':forms.TimeInput(attrs = {
+            'end_time':forms.DateInput(attrs = {
                 'class':"form-control",
+                'id':'arrival_time',
             }),
         }
     def __init__(self, *args, **kwargs):
@@ -59,3 +63,7 @@ class ReviewForm(forms.ModelForm):
     class Meta:
         model = Review
         fields = ['rating','comment']
+        
+        
+class TripDeleteForm(forms.Form):
+    delete = forms.BooleanField(initial = False)

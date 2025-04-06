@@ -1,5 +1,13 @@
-<form method="POST">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <input type='submit' value = 'Canceled'>
-</form>
+{% extends "base.html" %}
+{% block content %}
+<div class="form-container">
+    <h4 class="text-center mb-3">Cancelled order</h4>
+    <form method='POST'>
+        {% csrf_token %}
+        <h5>Are you sure you want to cancelled order?<span>{{ form.as_p }}</span></h5>
+        <div class="text-center mt-4">
+            <button type="submit" class="btn btn-danger">Cancelled</button>
+        </div>
+    </form>
+</div>
+{% endblock content %}

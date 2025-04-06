@@ -3,12 +3,13 @@ from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse_lazy, reverse
 from django.contrib.auth import get_user_model
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.mail import send_mail
 from django.views.generic import CreateView, ListView, UpdateView, DeleteView, DetailView, FormView, TemplateView
 from employees.forms import CategoryUpdateForm, RegisterUserForm, UserCreateForm, ProfileUpdateForm
 from employees.models import Administrator, Profile, Moderator, Member
 from employees.tasks import category_task
-from orders.utils import order_completed
+from orders.utils import MemberBarrier, order_completed
 # Create your views here.
 User = get_user_model()
 
@@ -26,7 +27,7 @@ class RegisterUser(CreateView):
         return super().form_valid(form)
     
     
-class ProfileUser(DetailView):
+class ProfileUser(LoginRequiredMixin, DetailView):
     model = User
     context_object_name = 'user'
     template_name = 'employees/profile.html'
@@ -42,18 +43,18 @@ class ProfileUser(DetailView):
         if self.request.user.is_administrator:
             queryset = self.get_object().administrator.filter(user__username=user.username).first()      
             if queryset:
-                context['moders'] = queryset.moderator_admin.all()
+                context['moders'] = queryset.moderator_admin.all().select_related('user','user__user')
         if self.request.user.is_member:
             orders = user.order_user.filter(user = user)
             order_completed(orders)
             context['orders'] = orders
         if hasattr(user, 'profile') and (hasattr(user.profile, 'member_user') or hasattr(user.profile,'moder_user')):
             if user.profile.member_user.category == 'DR':
-                context["vehicles"] = user.profile.owner_vehicle.all()
+                context["vehicles"] = user.profile.owner_vehicle.all().select_related('owner','owner__user','owner__moderator_user__user__user__profile','owner__member_user__user')
         return context
 
     
-class ModeratorCreateView(CreateView):
+class ModeratorCreateView(MemberBarrier, LoginRequiredMixin, CreateView):
     model = Moderator
     form_class = UserCreateForm
     template_name = 'employees/moder/moder_create.html'
@@ -70,14 +71,14 @@ class ModeratorCreateView(CreateView):
         Moderator.objects.create(user = moder.profile, admin = user.administrator.get(user=user))
         return super().form_valid(form)
     
-class ModeratorListView(ListView):
+class ModeratorListView(MemberBarrier, LoginRequiredMixin, ListView):
     model = Moderator
     template_name = 'employees/moder/moder_list.html'
     context_object_name = 'moderators'
     queryset = Moderator.objects.filter(user__user__is_moder = True)
     
 
-class ProfileUpdateView(UpdateView):
+class ProfileUpdateView(LoginRequiredMixin, UpdateView):
     model = User
     template_name = 'employees/profile_update.html'
     context_object_name = 'user'
@@ -114,14 +115,14 @@ class ProfileUpdateView(UpdateView):
         return super().form_valid(form)
 
 
-class MemberListView(ListView):
+class MemberListView(LoginRequiredMixin, ListView):
     model = Member
     context_object_name = 'members'
     template_name = 'employees/member/member_list.html'
-    queryset = Member.objects.filter(user__user__is_member = True)
+    queryset = Member.objects.filter(user__user__is_member = True).select_related('user','user__user')
+    
 
-
-class CategoryUpdateView(UpdateView):
+class CategoryUpdateView(LoginRequiredMixin, UpdateView):
     model = Member
     template_name = 'employees/profile_update.html'
     context_object_name = 'category'

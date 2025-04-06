@@ -11,6 +11,6 @@ def order_create_task(orders_id, booking_id, user_id, capacity = None):
     user = User.objects.get(id = user_id)
     subject = f"Your orders №{str(orders.id)[:4]}"
     messages_user = f"You have placed an order for a car for on date {booking.start_time} to your destination {booking.to_place}"
-    messages_owner = f"{booking.vehicle.owner} decided to go on your route with number of seats {capacity}.\nPhone - {user.profile.number}\Email - {user.email}"
+    messages_owner = f"{booking.vehicle.owner} decided to go on your route with number of seats {capacity}.\nPhone - {user.profile.number}\nEmail - {user.email}"
     send_mail(subject, messages_user, 'booking@gmail.com', [user.email])
     send_mail(subject, messages_owner, user.email, [booking.vehicle.owner.user.email])

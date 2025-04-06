@@ -1,5 +1,27 @@
-<form method="POST">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <input type='submit' value = 'Orders'>
-</form>
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="form-container">
+    <h4 class="text-center mb-3">Orders </h4>
+    
+    
+    <form method='POST'>
+        {% csrf_token %}
+            <h5>{{trip}}</h5>
+        {% with vehicle=trip.vehicle %}
+            <h5>Transport: {{ vehicle}}</h5>
+            {% for field in form  %}
+                <h5>{{ field.label}}: <span>{{ field }}</span></h5>
+            {% endfor %}
+            <h5>From: {{ trip.from_place}}</h5>
+            <h5>To: {{ trip.to_place}}</h5>
+            <h5>Start of the trip: {{ trip.start_time}}</h5>
+            <h5>Owner: {{ vehicle.owner}}</h5>
+        {% endwith %}
+        <div class="text-center mt-4">
+            <button type="submit" class="btn-submit">Order</button>
+        </div>
+    </form>
+</div>
+{% endblock content %}

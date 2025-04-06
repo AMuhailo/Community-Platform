@@ -3,6 +3,19 @@
         <a class="navbar-brand" href="{% url 'booking_list_url'%}"><i class="bi bi-dropbox"></i> Bookings</a>
         <div class='d-flex ms-auto align-items-center'>
         {% if request.user.is_authenticated %}
+            {% if request.user.is_administrator %}
+                <span class="navbar-text text-white me-3">
+                    <a href="{% url 'order_list_url'%}" class='text-decoration-none'>Orders</a>
+                </span>
+                <span class="navbar-text text-white me-3">
+                    <a href="{% url 'member_url' %}" class='text-decoration-none'>Member</a>
+                </span>
+            {% elif request.user.is_moder%}
+                <span class="navbar-text text-white me-3">
+                    <a href="{% url 'member_url' %}" class='text-decoration-none'>Member</a>
+                </span>
+            {% endif %}
+            
             <span class="navbar-text text-white me-5">
                 User: <a href="{% url 'profile_url' request.user.username %}" class='text-decoration-none'>{{ request.user.get_full_name}}</a>
             </span>

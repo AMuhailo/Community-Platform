@@ -3,15 +3,17 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse_lazy, reverse
 from django.views.generic import ListView, DetailView, FormView, UpdateView, DeleteView, CreateView
 from django.db.models import Avg, Min, F, Count, Q
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from booking.models import Review, Vehicle, Booking
-from booking.forms import BookingForm, VehicleForm, ReviewForm
+from booking.forms import BookingForm, VehicleForm, ReviewForm, TripDeleteForm
 from booking.utils import trips_over
+
 # Create your views here.
 User = get_user_model()
 
-class SuccessMixin:
+class SuccessMixin(LoginRequiredMixin):
     def get_form_kwargs(self):
             kwargs = super().get_form_kwargs()
             kwargs.update({
@@ -31,11 +33,11 @@ class BookingListView(ListView):
         queryset = Booking.objects.annotate(time = F('end_time') - F('start_time'), 
                                             average_rating=Avg('vehicle__owner__user__profile__user__review_received__rating'), 
                                             review_count=Count('vehicle__owner__user__profile__user__review_received'))\
-                                            .filter(status='complete',end_time__date__gte=timezone.now().date(),end_time__time__lte=timezone.now().time())\
+                                            .filter(status='complete',end_time__date__gte=timezone.now().date())\
                                             .select_related('vehicle',
                                                             'vehicle__owner',
                                                             'vehicle__owner__user',
-                                                            'vehicle__owner__user__profile')
+                                                            'vehicle__owner__user__profile').exclude(vehicle__owner = self.request.user.profile)
         Booking.objects.filter(end_time__date__lte=timezone.now().date(), end_time__time__lte=timezone.now().time()).update(status = 'cancelled')
         over = Booking.objects.filter(end_time__date__lte=timezone.now().date(), end_time__time__lte=timezone.now().time(), status = 'cancelled').values_list('id', flat=True)
         trips_over(booking_ids = over)
@@ -70,7 +72,7 @@ class BookingDetailView(DetailView):
                                             .select_related('vehicle',
                                                             'vehicle__owner',
                                                             'vehicle__owner__user',
-                                                            'vehicle__owner__user__profile')
+                                                            'vehicle__owner__user__profile').exclude(vehicle__owner = self.request.user.profile)
         return get_object_or_404(queryset, id = self.kwargs.get('booking_number'))
 
 
@@ -82,10 +84,9 @@ class BookingCreateView(SuccessMixin, CreateView):
         cd = form.cleaned_data
         new_booking = form.save(commit = False)
         new_booking.vehicle = cd['vehicle']
-        
         new_booking.save()
         return super().form_valid(form)
-    
+
 
 class BookingUpdateView(SuccessMixin, UpdateView):
     model = Booking    
@@ -96,9 +97,10 @@ class BookingUpdateView(SuccessMixin, UpdateView):
         queryset = Booking.objects.annotate(time = Min('end_time') - Min('start_time'))
         return get_object_or_404(queryset, id = self.kwargs.get('booking_number'))
 
-class BookingDeleteView(DeleteView):
+class BookingDeleteView(LoginRequiredMixin, DeleteView):
     model = Booking
-    context_object_name = 'trip'
+    form_class=TripDeleteForm
+    context_object_name = 'delete_trip'
     template_name = 'page/booking/booking_update.html'
     def get_object(self, queryset = ...):
         queryset = Booking.objects.annotate(time = Min('end_time') - Min('start_time'))
@@ -106,7 +108,7 @@ class BookingDeleteView(DeleteView):
     def get_success_url(self):
         return reverse_lazy('profile_url', args = [self.request.user.username])
     
-class VehicleListView(ListView):
+class VehicleListView(LoginRequiredMixin, ListView):
     model = Vehicle
     template_name = 'page/vehicle/vehicle_list.html'
     context_object_name = 'vehicles'
@@ -136,17 +138,25 @@ class VehicleUpdateView(SuccessMixin, UpdateView):
     def get_object(self):
         return get_object_or_404(Vehicle, id = self.kwargs.get('vehicle_number'))
     
-class ReviewCreateView(CreateView):
+class ReviewCreateView(LoginRequiredMixin,CreateView):
     model = Review
-    context_object_name = 'review'
     template_name = 'employees/profile_update.html'
     form_class = ReviewForm
     def get_success_url(self):
         return reverse("profile_url", args = [self.request.user.username])
     def form_valid(self, form):
         user = get_object_or_404(User, id=self.kwargs.get('user_pk'))
+        if Review.objects.filter(user=user, reviewer=self.request.user).exists():
+            form.add_error(None, "Ви вже залишали відгук цьому користувачу.")
+            return self.form_invalid(form)
         review = form.save(commit=False)
         review.user = user
         review.reviewer = self.request.user
         review.save()
         return super().form_valid(form)
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["review"] = get_object_or_404(User, id=self.kwargs.get('user_pk'))
+        return context
+    

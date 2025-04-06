@@ -1,11 +1,42 @@
-<form method="POST">
-    {% csrf_token %}
-    {{ form.as_p }}
-    {% if category %}
-        <input type='submit' class='btn btn-sm btn-primary' value='Updated category'>
-    {% elif review%}
-        <input type='submit' class='btn btn-sm btn-primary' value='Add review'>
-    {% else %}
-        <input type='submit' value='Updated profile'>
-    {% endif %}
-</form>
+
+{% extends "base.html" %}
+
+{% block content %}
+<div class="form-container">
+    <h4 class="text-center mb-3">
+        {% if review %}
+            Response
+        {% else %}
+            Edit Profile
+        {% endif %}
+    </h4>
+    <form method="POST">
+        {% if category %}
+            <h5><i class="fas fa-map-marker-alt"></i>Update category</h5>
+        {% elif review %}
+            <h5><i class="fas fa-map-marker-alt"></i>Response information</h5>
+        {% else %}
+            <h5><i class="fas fa-map-marker-alt"></i>User information</h5>
+        {% endif %}
+        {% csrf_token %}
+        {% for field in form %}
+            <div class="mb-3">
+                <label for="field-label" class="form-label">{{ field.label }}</label>
+                {{ field }}
+            </div>
+        {% endfor %}
+        <div class="text-center mt-4">        
+            {% if category %}
+                <input type='submit' class='btn btn-sm btn-primary' value='Updated category'>
+            {% elif review%}
+                <input type='submit' class='btn btn-sm btn-primary' value='Add review'>
+            {% else %}
+                <input type='submit' class='btn btn-sm btn-warning' value='Updated profile'>
+            {% endif %}
+        </div>
+        {% if form.errors %}
+            <p>{{ form.errors}}</p>
+        {% endif %}
+    </form>
+</div>
+{% endblock content %}

@@ -17,6 +17,7 @@ admin.site.register(Administrator)
 class ModeratorAdmin(admin.ModelAdmin):
     list_display = ['user','admin']
     
-
-admin.site.register(Member)
-
+@admin.register(Member)
+class MemberAdmin(admin.ModelAdmin):
+    list_display = ['user','category','created','updated']
+    

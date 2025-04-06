@@ -1,34 +1,45 @@
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, render,redirect
 from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.utils import timezone
 from django.core.mail import send_mail
-from flask import redirect
-import booking
+from django.contrib.auth.mixins import LoginRequiredMixin
 from booking.models import Booking, Vehicle
 from orders.forms import OrderCreateForm, OrderDeleteForm
 from orders.models import Order
 from orders.tasks import order_create_task
-from orders.utils import order_completed
+from orders.utils import MemberBarrier, order_completed
 # Create your views here.
 
-class OrderListView(ListView):
+class OrderMixin(LoginRequiredMixin):
     model = Order
-    template_name = 'page/orders/orders_list.html'
     context_object_name = 'orders'
-    
     def get_queryset(self):
-        orders = Order.objects.filter(date__gte = timezone.now().date())
+        orders = Order.objects.filter(date__gte = timezone.now().date()).select_related('booking','user','owner','booking__vehicle')
         order_completed(orders)
         return orders
-class OrderCreateView(CreateView):
+    
+class OrderListView(OrderMixin, ListView):
+    template_name = 'page/orders/orders_list.html'
+    
+    
+class OrderAllListView(MemberBarrier, OrderMixin, ListView):
+    template_name = 'page/orders/orders_allist.html'
+
+class OrderCreateView(LoginRequiredMixin, CreateView):
     model = Order
     template_name = 'page/orders/orders_created.html'
     form_class = OrderCreateForm
     success_url = reverse_lazy('booking_list_url')
-    
+    def get_object(self, queryset = ...):
+        return get_object_or_404(Booking, id = self.kwargs.get('booking_id')) 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["trip"] = self.get_object()
+        return context
+        
     def form_valid(self, form):
-        booking = get_object_or_404(Booking, id = self.kwargs.get('booking_id'))
+        booking = self.get_object()
         user = self.request.user
         cd = form.cleaned_data
         booking.vehicle.capacity_order(cd['capacity'])
@@ -43,10 +54,9 @@ class OrderCreateView(CreateView):
             booking.save()
         order_create_task.delay(orders.id, booking.id , user.id, cd['capacity'])
         return  super().form_valid(form)
-        
-    
 
-class OrderDeleteView(DeleteView):
+
+class OrderDeleteView(LoginRequiredMixin, DeleteView):
     model = Order
     template_name = 'page/orders/orders_delete.html'
     form_class = OrderDeleteForm

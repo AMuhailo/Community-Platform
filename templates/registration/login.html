@@ -1,6 +1,24 @@
-<form method="POST">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <input type='hidden' name='next' value='{{ next }}'>
-    <input type='submit' value='Log-in'>
-</form>
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<div class="auth-container">
+    <div class="auth-title">Login</div>
+        <form method="POST">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="mb-3">
+                    {{ field.label}}
+                    {{ field }}
+                </div>
+            {% endfor %}
+            <input type='hidden' name='next' value='{{ next }}'>
+            <div class="text-center">
+                <input type='submit' class='btn-main' value='Log-in'>
+            </div>
+        </form>
+    <!-- Switch Form -->
+    <div class="form-switch">
+        <p id="switch-text">Don't have an account? <a href="{% url 'register' %}" class='text-decoration-none'>Registered</a></p>
+    </div>
+</div>
+{% endblock content %}

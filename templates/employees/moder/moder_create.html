@@ -1,5 +1,21 @@
-<form method="POST" action="{% url 'moder_create_url' %}">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <input type='submit' value='Add Moderator'>
-</form>
+{% extends "base.html" %}
+
+{% block content %}
+<div class="form-container">
+    <h4 class="text-center mb-3">Add Moder</h4>
+    <form method='POST'>
+        {% csrf_token %}
+        <div class="form-section bg-light">
+            {% for field in form %}
+            <div class="mb-3">
+                <label for="field-label" class="form-label">{{ field.label }}</label>
+                {{ field }}
+            </div>
+            {% endfor %}
+        </div>
+        <div class="text-center mt-4">
+            <button type="submit" class="btn btn-primary">Create Moder</button>
+        </div>
+    </form>
+</div>
+{% endblock content %}
