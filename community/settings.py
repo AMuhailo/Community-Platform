@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'employees.apps.EmployeesConfig',
     'booking.apps.BookingConfig',
     'orders.apps.OrdersConfig',
+    'api.apps.ApiConfig',
 ]
 
 

@@ -29,7 +29,8 @@ urlpatterns = [
     path('employees/',include('employees.urls')),
     path('booking/',include('booking.urls')),
     path('orders/',include('orders.urls')),
-    path('__debug__/', include('debug_toolbar.urls'))
+    path('__debug__/', include('debug_toolbar.urls')),
+    path('api/', include('api.urls'))
 ]
 
 if settings.DEBUG:
