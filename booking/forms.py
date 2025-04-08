@@ -20,14 +20,17 @@ class BookingForm(forms.ModelForm):
                 'class':"form-control",
                 'id':'to_place',
             }),
-            'start_time':forms.DateInput(attrs = {
+            'start_time':forms.DateTimeInput(attrs = {
                 'class':"form-control",
-                'id':'start_time',
-            }),
-            'end_time':forms.DateInput(attrs = {
+                'type': 'datetime-local',
+                'class': 'form-control'
+                
+            },format='%Y-%m-%dT%H:%M'),
+            'end_time':forms.DateTimeInput(attrs = {
                 'class':"form-control",
-                'id':'arrival_time',
-            }),
+                'type': 'datetime-local',
+                'class': 'form-control'
+            }, format='%Y-%m-%dT%H:%M'),
         }
     def __init__(self, *args, **kwargs):
         request = kwargs.pop('request')

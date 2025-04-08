@@ -1,9 +1,11 @@
+from flask import g
 from rest_framework import generics 
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from django.db.models import Count
-from api.serializers import BookingSerializers, OrderSerializers, VehicleSerializers
+from api.serializers import BookingSerializers, OrderSerializers, VehicleSerializers, ModeratorSerializers, MemberSerializers
 from booking.models import Vehicle, Booking, Review
+from employees.models import Member, Moderator
 from orders.models import Order
 
 
@@ -24,12 +26,25 @@ class VehicleAPIViewset(ModelViewSet):
     
     def retrieve(self, request, *args, **kwargs):
         vehicle = self.get_object()
-        vehicle_srz = self.get_serializer(vehicle).data
-        return Response({'transport': vehicle_srz})
+        return Response({'transport':{
+                                'id':vehicle.id,
+                                'vehicle':vehicle.vehicle,
+                                f'{vehicle.vehicle}_data':{
+                                    'brand':vehicle.brand,
+                                    'year':vehicle.year,
+                                    'capacity':vehicle.capicity,
+                                    'location':vehicle.location
+                                },
+                                'owner':{
+                                    'first_name':vehicle.owner.user.first_name,
+                                    'last_name':vehicle.owner.user.last_name,
+                                }
+                            }
+                         })
 
     def update(self, request, *args, **kwargs):
-        response = super().update(request, *args, **kwargs)
-        return Response({'transport': response.data})
+        response = super().update(request, *args, **kwargs).data
+        return Response({'transport': response})
 
 
 class BookingAPIViewset(ModelViewSet):
@@ -43,6 +58,11 @@ class BookingAPIViewset(ModelViewSet):
         cancelled_data = self.get_serializer(cancelled_booking, many = True).data
         pending_data = self.get_serializer(pending_booking, many = True).data
         return Response({"booking_data":[
+                                    {
+                                    'complete_count':len(complete_data),
+                                    'cancelle_count':len(cancelled_data),
+                                    'pending_count':len(pending_data)
+                                },
                                 {
                                     'complete':complete_data, 
                                     'cencelled':cancelled_data, 
@@ -53,24 +73,40 @@ class BookingAPIViewset(ModelViewSet):
     
     def retrieve(self, request, *args, **kwargs):
         booking = self.get_object()
-        booking_data = self.get_serializer(booking).data
         orders = booking.order_booking.all()
-        order_data = OrderSerializers(orders, many = True).data
-        booking_data['order'] = order_data
-        return Response({f"booking_{str(booking.id)[:4]}":[
+        orders_data = OrderSerializers(orders, many = True).data
+        return Response({f"booking_{str(booking.id)[:4]}":
                                 {
-                                    f"{booking.status}":booking_data,
+                                    f"{booking.status}":{
+                                        'id':booking.id,
+                                        "vehicle":booking.vehicle.vehicle,
+                                        "price":booking.price,
+                                        'trips':{
+                                            'from':booking.from_place,
+                                            'to':booking.to_place
+                                        },
+                                        'start_time':[
+                                                {
+                                                    "date":booking.start_time.date(), 
+                                                    "time":booking.start_time.time()
+                                                }
+                                            ],
+                                        'end_time':[
+                                                {
+                                                    "date":booking.end_time.date(), 
+                                                    "time":booking.end_time.time()
+                                                }
+                                            ],
+                                        'orders':orders_data
+                                    },
                                 }
-                            ]
                         })
     
     def update(self, request, *args, **kwargs):
         response = super().update(request, *args, **kwargs).data
-        return Response({f"booking_{str(response.id)[:4]}":[
-                                {
-                                    f"{response.status}":response
-                                }
-                            ]
+        return Response({f"booking0":[{
+                                    f"status":response
+                                }]
                         })
         
 class OrderAPIViewset(ModelViewSet):
@@ -80,17 +116,117 @@ class OrderAPIViewset(ModelViewSet):
     def list(self, request, *args, **kwargs):
         orders = self.queryset
         order_data = self.get_serializer(orders, many = True).data
-        return Response({"orders":order_data})
+        return Response({"count":len(order_data),"orders":order_data})
     
     def retrieve(self, request, *args, **kwargs):
         order = self.get_object()
         booking = order.booking
-        order_data = self.get_serializer(order, many = False).data
-        booking_data = BookingSerializers(booking, many = False).data        
-        return Response({f"order_{str(order.id)[:4]}":[
-                                {
-                                    'data':order_data,
-                                    'booking':booking_data
-                                }
-                            ]
+        return Response({f"order_{str(order.id)[:4]}":{
+                                    'order_data':{
+                                            "id":order.id,
+                                            "price":order.price,
+                                            "capacity": order.capacity,
+                                            "owner":{
+                                                "first_name":order.owner.first_name,
+                                                "last_name":order.owner.last_name,
+                                            },
+                                            "user":{
+                                                "first_name":order.user.first_name,
+                                                "last_name":order.user.last_name,
+                                            },
+                                        },
+                                        f"booking_{str(booking.id)[:4]}":
+                                            {
+                                                f"{booking.status}":{
+                                                    'id':booking.id,
+                                                    "vehicle":booking.vehicle.vehicle,
+                                                    "price":booking.price,
+                                                    'trips':{
+                                                        'from':booking.from_place,
+                                                        'to':booking.to_place
+                                                    },
+                                                    'start_time':[
+                                                            {
+                                                                "date":booking.start_time.date(), 
+                                                                "time":booking.start_time.time()
+                                                            }
+                                                        ],
+                                                    'end_time':[
+                                                            {
+                                                                "date":booking.end_time.date(), 
+                                                                "time":booking.end_time.time()
+                                                            }
+                                                        ],
+                                                },
+                                            }    
+                                    }
+                                })
+    
+    def update(self, request, *args, **kwargs):
+        response = super().update(request, *args, **kwargs).data
+        return Response({f"booking0":[{
+                                    f"status":response
+                                }]
+                        })
+        
+        
+class ModerAPIViewset(ModelViewSet):
+    queryset = Moderator.objects.all()
+    serializer_class = ModeratorSerializers
+    
+    def list(self, request, *args, **kwargs):
+        moders = self.queryset
+        moder_data = self.get_serializer(moders, many = True).data
+        return Response({'moders':moder_data})
+    
+    def retrieve(self, request, *args, **kwargs):
+        moder = self.get_object()
+        return Response({f'moder_{moder.id}':{
+                                "id":moder.id,
+                                'user':{"first_name":moder.user.user.first_name,
+                                        "last_name":moder.user.user.last_name
+                                       }
+                            }
+                         })
+        
+    def update(self, request, *args, **kwargs):
+        response = super().update(request, *args, **kwargs).data
+        return Response({f"booking0":[{
+                                    f"status":response
+                                }]
+                        })
+
+class MemberAPIViewwet(ModelViewSet):
+    serializer_class = MemberSerializers
+    queryset = Member.objects.annotate(
+            review=Count('user__user__review_received', distinct=True)
+        )
+    def list(self, request, *args, **kwargs):
+        members = self.queryset
+        
+        member_mb = members.filter(category = 'MB')
+        member_dr = members.filter(category = 'DR')
+        member_data = MemberSerializers(members, many = True).data
+        return Response({"category":{
+                                "driver":len(member_dr),
+                                "member":len(member_mb),
+                            },
+                        'member':member_data,
+                        })
+    def retrieve(self, request, *args, **kwargs):
+        member = self.get_object()
+        vehicle = member.user.owner_vehicle.all()
+        if vehicle:
+            vehicle = VehicleSerializers(vehicle, many = True).data
+        else:
+            vehicle = None
+        print(vehicle)
+        return Response({f"member_{member.id}":{
+                                'first_name':member.user.user.first_name,
+                                'last_name':member.user.user.last_name,
+                                'category':member.category,
+                                'age':member.user.age,
+                                'reviews':len(member.user.user.review_received.all()),
+                                'vehicle':vehicle,
+                            }   
                         })

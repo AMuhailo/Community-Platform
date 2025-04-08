@@ -37,7 +37,8 @@ class BookingListView(ListView):
                                             .select_related('vehicle',
                                                             'vehicle__owner',
                                                             'vehicle__owner__user',
-                                                            'vehicle__owner__user__profile').exclude(vehicle__owner = self.request.user.profile)
+                                                            'vehicle__owner__user__profile')\
+                                            .exclude(vehicle__owner = self.request.user.profile)
         Booking.objects.filter(end_time__date__lte=timezone.now().date(), end_time__time__lte=timezone.now().time()).update(status = 'cancelled')
         over = Booking.objects.filter(end_time__date__lte=timezone.now().date(), end_time__time__lte=timezone.now().time(), status = 'cancelled').values_list('id', flat=True)
         trips_over(booking_ids = over)
