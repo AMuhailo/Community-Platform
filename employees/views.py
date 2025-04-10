@@ -1,4 +1,7 @@
+import requests
+import plotly.express as pl
 from random import choice, randint
+from django.conf import settings
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse_lazy, reverse
@@ -6,6 +9,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.mail import send_mail
 from django.views.generic import CreateView, ListView, UpdateView, DeleteView, DetailView, FormView, TemplateView
+from booking.models import Review
 from employees.forms import CategoryUpdateForm, RegisterUserForm, UserCreateForm, ProfileUpdateForm
 from employees.models import Administrator, Profile, Moderator, Member
 from employees.tasks import category_task
@@ -141,3 +145,17 @@ def change_category(request, user_pk):
     profile = request.user.profile
     category_task.delay(user.id, profile.id)
     return redirect('profile_url', request.user.username)
+
+def char_review_member(request):
+    response = requests.get(settings.CHAR_API)
+    
+    if response.status_code == 200:
+        data = response.json()
+        users_data = [user['user'] for user in data['member']]
+        reviews = [review['review'] for review in data['member']]
+        
+        fig = pl.bar(x = users_data , y = reviews, title = 'User review', labels={"x":"User Name", 'y':"Reviews"})
+        char = fig.to_html()
+    users = User.objects.all()[:6]
+    context = {"char":char, 'users':users, 'user':request.user}
+    return render(request, 'employees/moder/char.html',context)

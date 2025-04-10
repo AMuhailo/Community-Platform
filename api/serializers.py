@@ -4,6 +4,7 @@ from orders.models import Order
 from employees.models import Moderator, Member
 
 class VehicleSerializers(serializers.ModelSerializer):
+    owner = serializers.HiddenField(default = serializers.CurrentUserDefault())
     class Meta:
         model = Vehicle
         fields = ['id','vehicle','brand','year','capicity','location','owner']
@@ -14,12 +15,14 @@ class BookingSerializers(serializers.ModelSerializer):
         fields = ['id','vehicle','price','from_place','to_place','start_time','end_time','status']
         
 class OrderSerializers(serializers.ModelSerializer):
+    user = serializers.HiddenField(default = serializers.CurrentUserDefault())
     class Meta:
         model = Order
-        fields = ['id','booking','price','capacity','owner','user','owner']
+        fields = ['id','booking','price','capacity','owner','user']
         
 
 class ModeratorSerializers(serializers.ModelSerializer):
+    admin =  serializers.HiddenField(default = serializers.CurrentUserDefault())
     class Meta:
         model = Moderator
         fields = ['id','user','admin']

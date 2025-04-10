@@ -1,19 +1,28 @@
-from flask import g
 from rest_framework import generics 
 from rest_framework.response import Response
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.viewsets import ModelViewSet
+from rest_framework.permissions import IsAuthenticated, IsAdminUser, IsAuthenticatedOrReadOnly
 from django.db.models import Count
+from api.permissions import IsMemberPermission
 from api.serializers import BookingSerializers, OrderSerializers, VehicleSerializers, ModeratorSerializers, MemberSerializers
-from booking.models import Vehicle, Booking, Review
+from booking.models import Vehicle, Booking
 from employees.models import Member, Moderator
 from orders.models import Order
 
 
 # Create your views here.
+class PaginationAPIAll(PageNumberPagination):
+    page_size = 5
+    page_size_query_param = 'pages'
+    max_page_size = 10
+
 
 class VehicleAPIViewset(ModelViewSet):
     queryset = Vehicle.objects.all()
     serializer_class = VehicleSerializers
+    permission_classes = [IsAuthenticated]
+    pagination_class = PaginationAPIAll
     def list(self, request, *args, **kwargs):
         cars = Vehicle.objects.filter(vehicle = 'car')
         car_data = self.get_serializer(cars, many = True).data
@@ -50,6 +59,9 @@ class VehicleAPIViewset(ModelViewSet):
 class BookingAPIViewset(ModelViewSet):
     queryset = Booking.objects.all()
     serializer_class = BookingSerializers
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    pagination_class = PaginationAPIAll
+
     def list(self, request, *args, **kwargs):
         complete_booking = Booking.objects.filter(status = 'complete')
         cancelled_booking = Booking.objects.filter(status = 'cancelled')
@@ -112,7 +124,8 @@ class BookingAPIViewset(ModelViewSet):
 class OrderAPIViewset(ModelViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderSerializers
-    
+    permission_classes = [IsAuthenticated]
+    pagination_class = PaginationAPIAll
     def list(self, request, *args, **kwargs):
         orders = self.queryset
         order_data = self.get_serializer(orders, many = True).data
@@ -173,7 +186,8 @@ class OrderAPIViewset(ModelViewSet):
 class ModerAPIViewset(ModelViewSet):
     queryset = Moderator.objects.all()
     serializer_class = ModeratorSerializers
-    
+    permission_classes = [IsAdminUser]
+    pagination_class = PaginationAPIAll
     def list(self, request, *args, **kwargs):
         moders = self.queryset
         moder_data = self.get_serializer(moders, many = True).data
@@ -198,9 +212,9 @@ class ModerAPIViewset(ModelViewSet):
 
 class MemberAPIViewwet(ModelViewSet):
     serializer_class = MemberSerializers
-    queryset = Member.objects.annotate(
-            review=Count('user__user__review_received', distinct=True)
-        )
+    queryset = Member.objects.annotate(review=Count('user__user__review_received', distinct=True))
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    pagination_class = PaginationAPIAll
     def list(self, request, *args, **kwargs):
         members = self.queryset
         
@@ -213,6 +227,8 @@ class MemberAPIViewwet(ModelViewSet):
                             },
                         'member':member_data,
                         })
+        
+        
     def retrieve(self, request, *args, **kwargs):
         member = self.get_object()
         vehicle = member.user.owner_vehicle.all()
@@ -220,7 +236,6 @@ class MemberAPIViewwet(ModelViewSet):
             vehicle = VehicleSerializers(vehicle, many = True).data
         else:
             vehicle = None
-        print(vehicle)
         return Response({f"member_{member.id}":{
                                 'first_name':member.user.user.first_name,
                                 'last_name':member.user.user.last_name,

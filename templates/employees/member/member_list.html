@@ -4,7 +4,7 @@
     <div class="container py-5">
     <h2 class="text-center mb-4">System members</h2>
         <div class="table-card">
-            <h4 class="mb-3">👤 Member</h4>
+            <h4 class="mb-3">👤 Member <span class='text-secondary fw-light'><a href="{% url 'char_url'%}" class='text-decoration-none text-secondary'>(GRAPHS)</a></span></h4>
             <div class="table-responsive">
                 <table class="table table-hover align-middle text-center">
                     <thead>
@@ -27,7 +27,6 @@
                                 <td>{{ member.user.number}}</td>
                                 <td>{{ member.user.user.email}}</td>
                                 <td><a href="{% url 'category_update_url' member.user.member_user.id %}" class='text-decoration-none'>{{ member.category}}</a></td>
-
                             </tr>
                             {% endif %}
                         {% endfor %}

@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container py-5">
+    <h2 class="text-center mb-5">📊 Static and reviews</h2>
+
+    <div class="row g-4">
+        <div class="col-md-8">
+            <div class="stats-card">
+                <h5 class="mb-4">Bar graphs reviews</h5>
+                {{ char|safe }}
+
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stats-card rating-table">
+                <h5 class="mb-4">🏆 Rarings</h5>
+                <table class="table text-center align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Photo</th>
+                            <th>Full Name</th>
+                            <th>Rating</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% with profile=user.profile %}
+                        <tr>
+                            <td><img src="https://i.pravatar.cc/200?img={{ profile.id}}" alt="profile-photo" class="profile-img"></td>
+                            <td>{{ user.get_full_name}}</td>
+                            <td>{{ user.get_average_rating}} ⭐</td>
+                        </tr>
+                        {% endwith %}
+                        {% for user in users %}
+                            {% with profile=user.profile %}
+                                <tr>
+                                    <td><img src="https://i.pravatar.cc/200?img={{ profile.id}}" alt="profile-photo" class="profile-img"></td>
+                                    <td>{{ user.get_full_name}}</td>
+                                    <td>{{ user.get_average_rating}}
+                                        <a href="{% url 'review_url' user.id %}"><i class="bi bi-star-fill text-warning"></i></a>
+                                    </td>
+                                </tr>
+                            {% endwith %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

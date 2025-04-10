@@ -376,3 +376,17 @@ body{
 .btn-edit:hover {
     background-color: #0056b3;
 }
+
+.stats-card {
+    background: #fff;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    padding: 25px;
+    margin-bottom: 40px;
+        }
+        .rating-table img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+        }
