@@ -1,8 +1,11 @@
 import graphene
 from django.contrib.auth import get_user_model
 from graphene_django import DjangoObjectType
+from graphene_django.fields import DjangoListField
+from django.utils import timezone
 from booking.models import Vehicle, Booking, Review
-from employees.models import Profile
+from employees.models import Profile, Moderator, Member
+from orders.models import Order
 
 User = get_user_model()
 
@@ -16,6 +19,11 @@ class VehicleType(DjangoObjectType):
         model = Vehicle
         fields = ['id', 'vehicle', 'brand', 'year', 'capicity', 'location', 'owner']
     
+class OrderType(DjangoObjectType):
+    class Meta:
+        model = Order
+        fields = ['id', 'booking','price','capacity', 'owner', 'user', 'date']
+    
 class ProfileType(DjangoObjectType):
     class Meta:
         model = Profile
@@ -24,35 +32,46 @@ class ProfileType(DjangoObjectType):
 class UserType(DjangoObjectType):
     class Meta:
         model = User
-        fields = ['username', 'first_name', 'last_name', 'email']
+        fields = ['id','username', 'first_name', 'last_name', 'email']
 
-        
+class MemberType(DjangoObjectType):
+    class Meta:
+        model = Member
+        fields = ['user', 'category', 'created']
+
+
+class ModersType(DjangoObjectType):
+    class Meta:
+        model = Member
+        fields = ['id','user']
+
 class Query(graphene.ObjectType):
-    all_booking = graphene.List(BookingType)
-    all_vehicle = graphene.List(VehicleType)
-    all_profile = graphene.List(ProfileType)
+    all_booking = DjangoListField(BookingType)
+    all_vehicle = DjangoListField(VehicleType)
+    all_orders = DjangoListField(OrderType)
+    
+    all_profile = DjangoListField(ProfileType)
+    all_member = DjangoListField(MemberType)
+    all_moder = DjangoListField(ModersType)
     
     booking = graphene.Field(BookingType, id = graphene.String())
     vehicle = graphene.Field(VehicleType, id = graphene.Int())
-
+    orders = graphene.Field(OrderType, id = graphene.String())
+    member = graphene.Field(MemberType, username = graphene.String())
     
-    def resolve_all_booking(root, info):
-        return Booking.objects.all()
     
     def resolve_booking(root, info, id):
         return Booking.objects.get(id = id)
     
-    def resolve_all_vehicle(root, info):
-        return Vehicle.objects.all()
-    
     def resolve_vehicle(root, info, id):
         return Vehicle.objects.get(id = id)
     
-    def resolve_all_profile(root, info):
-        return Profile.objects.all()
-    
-    def resolve_all_user(root,info):
-        return User.objects.all()
+    def resolve_order(root, info, id):
+        return Order.objects.get(id = id)
+
+    def resolve_member(root, info, username):
+        return Member.objects.get(user__user__username = username)
+
 
 class VehicleCreate(graphene.Mutation):
     class Arguments:
@@ -76,6 +95,7 @@ class VehicleCreate(graphene.Mutation):
         )
         return VehicleCreate(vehicle = vehicle)
 
+
 class VehicleUpdate(graphene.Mutation):
     class Arguments:
         id = graphene.ID(required = True)
@@ -89,6 +109,18 @@ class VehicleUpdate(graphene.Mutation):
         vehicle.capicity = capicity
         vehicle.location = location
         vehicle.save()
+        return VehicleUpdate(vehicle = vehicle)
+
+
+class VehicleDelete(graphene.Mutation):
+    class Arguments:
+        id = graphene.ID(required = True)
+        
+    vehicle = graphene.Field(VehicleType)
+    
+    def mutate(self, info, id):
+        vehicle = Vehicle.objects.get(id = id)
+        vehicle.delete()
         return VehicleUpdate(vehicle = vehicle)
 
 
@@ -135,14 +167,83 @@ class BookingUpdate(graphene.Mutation):
         booking.save()
         return BookingUpdate(booking = booking)
 
-
+class BookingDelete(graphene.Mutation):
+    class Arguments:
+        id = graphene.ID(required = True)
         
+    booking = graphene.Field(BookingType)
+
+    def mutate(self, info, id):
+        booking = Booking.objects.get(id=id)
+        booking.delete()
+        return BookingUpdate(booking = booking)
+
+
+class OrderCreate(graphene.Mutation):
+    class Arguments:
+        booking = graphene.ID()
+        capacity = graphene.Int()
+        user = graphene.ID()
+    
+    orders = graphene.Field(OrderType)
+    
+    def mutate(self, info , booking, capacity, user):
+        booking = Booking.objects.get(id = booking)
+        orders = Order.objects.create(booking = booking,
+                                    price = booking.price,
+                                    capacity = capacity, 
+                                    owner = booking.vehicle.owner.user,
+                                    user_id = user,
+                                    date = timezone.now().date())    
+        return OrderCreate(orders = orders)
+    
+class OrderUpdate(graphene.Mutation):
+    class Arguments:
+        id = graphene.String(required = True)
+        booking = graphene.ID(required = True)
+        price = graphene.String(required = True)
+        capacity = graphene.Int(required = True)
+        owner = graphene.ID(required = True)
+        user = graphene.ID(required = True)
+        date = graphene.Date(required = True)
+        
+    orders = graphene.Field(OrderType)
+    
+    def mutate(self, info , id, booking, price, capacity, owner, user, date):
+        orders = Order.objects.get(id = id)
+        orders.booking = booking
+        orders.price = price
+        orders.capacity = capacity
+        orders.owner = owner
+        orders.user = user
+        orders.date = date
+        orders.save()
+        
+        return OrderUpdate(orders = orders)
+    
+class OrderDelete(graphene.Mutation):
+    class Arguments:
+        id = graphene.String(required = True)
+        
+    orders = graphene.Field(OrderType)
+    
+    def mutate(self, info , id):
+        orders = Order.objects.get(id = id)
+        orders.delete()
+        return OrderUpdate(orders = orders)
+    
+    
 class Mutation(graphene.ObjectType):
     create_booking = BookingCreate.Field()
     update_booking = BookingUpdate.Field()
-
+    delete_booking = BookingDelete.Field()
+    
     create_vehicle = VehicleCreate.Field()
     update_vehicle = VehicleUpdate.Field()
-
+    delete_booking = VehicleDelete.Field()
+    
+    create_orders = OrderCreate.Field()
+    update_orders = OrderUpdate.Field()
+    delete_orders = OrderDelete.Field()
     
 schema = graphene.Schema(query = Query, mutation = Mutation)

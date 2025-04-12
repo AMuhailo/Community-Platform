@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'django_htmx',
     'storages',
     "graphene_django",
+    "graphql_auth",
 
     #My Apps
     'employees.apps.EmployeesConfig',
@@ -59,8 +60,17 @@ INSTALLED_APPS = [
 ]
 
 GRAPHENE = {
-    "SCHEMA": "booking.schema.schema"
+    "SCHEMA": "booking.schema.schema",
+    "MIDDLEWARE": [
+        "graphql_jwt.middleware.JSONWebTokenMiddleware",
+    ],
 }
+
+AUTHENTICATION_BACKENDS = [
+    "graphql_jwt.backends.JSONWebTokenBackend",
+    "django.contrib.auth.backends.ModelBackend",
+]
+
 
 INTERNAL_IPS = [
     "127.0.0.1",
