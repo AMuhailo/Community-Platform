@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'django_htmx',
     'storages',
     "graphene_django",
+    "graphql_jwt.refresh_token.apps.RefreshTokenConfig",
     "graphql_auth",
 
     #My Apps
@@ -60,14 +61,26 @@ INSTALLED_APPS = [
 ]
 
 GRAPHENE = {
-    "SCHEMA": "booking.schema.schema",
+    "SCHEMA": "booking.myschema.schema",
     "MIDDLEWARE": [
         "graphql_jwt.middleware.JSONWebTokenMiddleware",
     ],
 }
 
+GRAPHQL_JWT = {
+    "JWT_ALLOW_ANY_CLASSES":[
+        "graphql_auth.mutations.Register",
+        "graphql_auth.mutations.VerifyAccount",
+        "graphql_auth.mutations.ObtainJSONWebToken",
+        "graphql_auth.mutations.UpdateAccount",
+    ],
+    "JWT_VERIFY_EXPIRATION": True,
+    "JWT_LONG_RUNNING_REFRESH_TOKEN": True,
+}
+
 AUTHENTICATION_BACKENDS = [
-    "graphql_jwt.backends.JSONWebTokenBackend",
+    # "graphql_jwt.backends.JSONWebTokenBackend",
+    'graphql_auth.backends.GraphQLAuthBackend',
     "django.contrib.auth.backends.ModelBackend",
 ]
 
@@ -141,6 +154,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     "django_htmx.middleware.HtmxMiddleware",
     "debug_toolbar.middleware.DebugToolbarMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
 ]
 
 ROOT_URLCONF = 'community.urls'

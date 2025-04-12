@@ -1,7 +1,9 @@
 import graphene
-from django.contrib.auth import get_user_model
 from graphene_django import DjangoObjectType
 from graphene_django.fields import DjangoListField
+from graphql_auth.schema import UserQuery, MeQuery
+from graphql_auth import mutations
+from django.contrib.auth import get_user_model
 from django.utils import timezone
 from booking.models import Vehicle, Booking, Review
 from employees.models import Profile, Moderator, Member
@@ -45,7 +47,7 @@ class ModersType(DjangoObjectType):
         model = Member
         fields = ['id','user']
 
-class Query(graphene.ObjectType):
+class Query(UserQuery,MeQuery, graphene.ObjectType):
     all_booking = DjangoListField(BookingType)
     all_vehicle = DjangoListField(VehicleType)
     all_orders = DjangoListField(OrderType)
@@ -72,7 +74,13 @@ class Query(graphene.ObjectType):
     def resolve_member(root, info, username):
         return Member.objects.get(user__user__username = username)
 
-
+class AuthRegister(graphene.ObjectType):
+    register = mutations.Register.Field()
+    verify = mutations.VerifyAccount.Field()
+    token_auth = mutations.ObtainJSONWebToken.Field()
+    update = mutations.UpdateAccount.Field()
+    reset_password = mutations.SendPasswordResetEmail.Field()
+    password_reset = mutations.PasswordReset.Field()
 class VehicleCreate(graphene.Mutation):
     class Arguments:
         vehicle = graphene.String()
@@ -233,7 +241,7 @@ class OrderDelete(graphene.Mutation):
         return OrderUpdate(orders = orders)
     
     
-class Mutation(graphene.ObjectType):
+class Mutation(AuthRegister, graphene.ObjectType):
     create_booking = BookingCreate.Field()
     update_booking = BookingUpdate.Field()
     delete_booking = BookingDelete.Field()
