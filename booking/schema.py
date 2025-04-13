@@ -1,10 +1,11 @@
 import graphene
+import graphql_jwt
 from graphene_django import DjangoObjectType
 from graphene_django.fields import DjangoListField
-from graphql_auth.schema import UserQuery, MeQuery
-from graphql_auth import mutations
+from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth import get_user_model
 from django.utils import timezone
+from graphql import GraphQLError
 from booking.models import Vehicle, Booking, Review
 from employees.models import Profile, Moderator, Member
 from orders.models import Order
@@ -47,7 +48,7 @@ class ModersType(DjangoObjectType):
         model = Member
         fields = ['id','user']
 
-class Query(UserQuery,MeQuery, graphene.ObjectType):
+class Query(graphene.ObjectType):
     all_booking = DjangoListField(BookingType)
     all_vehicle = DjangoListField(VehicleType)
     all_orders = DjangoListField(OrderType)
@@ -61,11 +62,15 @@ class Query(UserQuery,MeQuery, graphene.ObjectType):
     orders = graphene.Field(OrderType, id = graphene.String())
     member = graphene.Field(MemberType, username = graphene.String())
     
+    user = graphene.Field(UserType)
     
     def resolve_booking(root, info, id):
         return Booking.objects.get(id = id)
     
     def resolve_vehicle(root, info, id):
+        user = info.context.user
+        if not user.is_authenticated:
+            raise Exception('Unregistered!')
         return Vehicle.objects.get(id = id)
     
     def resolve_order(root, info, id):
@@ -74,15 +79,54 @@ class Query(UserQuery,MeQuery, graphene.ObjectType):
     def resolve_member(root, info, username):
         return Member.objects.get(user__user__username = username)
 
-class AuthRegister(graphene.ObjectType):
-    register = mutations.Register.Field()
-    verify = mutations.VerifyAccount.Field()
-    token_auth = mutations.ObtainJSONWebToken.Field()
-    update = mutations.UpdateAccount.Field()
-    reset_password = mutations.SendPasswordResetEmail.Field()
-    password_reset = mutations.PasswordReset.Field()
-    
+    def resolve_user(root, info):
+        user = info.context.user
+        if user.is_anonymous:
+            raise Exception("Not logged in!")
+        return user
+class ObtainToken(graphql_jwt.ObtainJSONWebToken):
+    @classmethod
+    def resolve(cls,root, info, **kwargs):
+        return super().resolve(root,info,**kwargs)    
 
+class RegisterUser(graphene.Mutation):
+    class Arguments:
+        username = graphene.String(required = True)
+        email = graphene.String(required = True)
+        password = graphene.String(required = True)
+
+    success = graphene.Boolean()
+    user_id = graphene.ID()
+    message = graphene.String()
+    def mutate(self, info , username, email, password):
+        if User.objects.filter(username = username).exists():
+            raise GraphQLError("Username already taken")
+        if User.objects.filter(email = email).exists():
+            raise GraphQLError("Email already taken")
+        validate_password(password)
+        user = User.objects.create_user(username = username, email = email, password=password)
+        return RegisterUser(user_id= user.id, success = True, message = "You have authorized.")
+
+class UpdateUser(graphene.Mutation):
+    class Arguments:
+        first_name = graphene.String(required = True)
+        last_name = graphene.String(required = True)
+    
+    success = graphene.Boolean()
+    message = graphene.String()
+    user_id = graphene.ID()
+    
+    def mutate(self, info, first_name, last_name):
+        user = info.context.user
+        if user.is_anonymous:
+            raise Exception("Not logged in!")
+        user = User.objects.get(username = user.username)
+        user.first_name = first_name
+        user.last_name = last_name
+        user.save()
+        return UpdateUser(user_id = user.id, success = True, message = 'You have successfully updated your data!')
+    
+    
 class VehicleCreate(graphene.Mutation):
     class Arguments:
         vehicle = graphene.String()
@@ -301,7 +345,7 @@ class OrderDelete(graphene.Mutation):
         return OrderUpdate(orders = orders)
     
     
-class Mutation(AuthRegister, graphene.ObjectType):
+class Mutation(graphene.ObjectType):
     create_booking = BookingCreate.Field()
     update_booking = BookingUpdate.Field()
     delete_booking = BookingDelete.Field()
@@ -313,5 +357,15 @@ class Mutation(AuthRegister, graphene.ObjectType):
     create_orders = OrderCreate.Field()
     update_orders = OrderUpdate.Field()
     delete_orders = OrderDelete.Field()
+    
+    token_auth = ObtainToken.Field()
+    verify_token = graphql_jwt.Verify.Field()
+    refresh_token = graphql_jwt.Refresh.Field()
+    revoke_token = graphql_jwt.Revoke.Field()
+    
+    
+    update_user = UpdateUser.Field()
+    register = RegisterUser.Field()
+    
     
 schema = graphene.Schema(query = Query, mutation = Mutation)

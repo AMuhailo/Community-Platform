@@ -56,7 +56,6 @@ INSTALLED_APPS = [
     'storages',
     "graphene_django",
     "graphql_jwt.refresh_token.apps.RefreshTokenConfig",
-    "graphql_auth",
 
     #My Apps
     'employees.apps.EmployeesConfig',
@@ -73,18 +72,15 @@ GRAPHENE = {
 }
 
 GRAPHQL_JWT = {
-    "JWT_ALLOW_ANY_CLASSES":[
-        "graphql_auth.mutations.Register",
-        "graphql_auth.mutations.VerifyAccount",
-        "graphql_auth.mutations.ObtainJSONWebToken",
-        "graphql_auth.mutations.UpdateAccount",
-    ],
     "JWT_VERIFY_EXPIRATION": True,
     "JWT_LONG_RUNNING_REFRESH_TOKEN": True,
+    "JWT_ALLOW_ANY_CLASSES": [
+        "booking.schema.Mutation",
+    ],
 }
 
 AUTHENTICATION_BACKENDS = [
-    'graphql_auth.backends.GraphQLAuthBackend',
+    "graphql_jwt.backends.JSONWebTokenBackend",
     "django.contrib.auth.backends.ModelBackend",
 ]
 
