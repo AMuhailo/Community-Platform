@@ -81,6 +81,8 @@ class AuthRegister(graphene.ObjectType):
     update = mutations.UpdateAccount.Field()
     reset_password = mutations.SendPasswordResetEmail.Field()
     password_reset = mutations.PasswordReset.Field()
+    
+
 class VehicleCreate(graphene.Mutation):
     class Arguments:
         vehicle = graphene.String()
@@ -91,8 +93,16 @@ class VehicleCreate(graphene.Mutation):
         owner = graphene.ID()
         
     vehicle = graphene.Field(VehicleType)
+    success = graphene.Boolean()
+    message = graphene.String()
     
     def mutate(self, info, vehicle, brand, year, capicity, location, owner):
+        user = info.context.user
+        if not user.is_authenticated:
+            raise Exception(f"You are not authorized!")
+        
+        if not user.profile.member_user.category == "DR":
+            raise Exception("You are not a driver.")
         vehicle = Vehicle.objects.create(
             vehicle = vehicle,
             brand = brand,
@@ -101,7 +111,7 @@ class VehicleCreate(graphene.Mutation):
             location = location,
             owner_id = owner
         )
-        return VehicleCreate(vehicle = vehicle)
+        return VehicleCreate(vehicle = vehicle, success = True, message = "Vehicle success created!")
 
 
 class VehicleUpdate(graphene.Mutation):
@@ -111,13 +121,21 @@ class VehicleUpdate(graphene.Mutation):
         location = graphene.String(required = True)
         
     vehicle = graphene.Field(VehicleType)
+    success = graphene.Boolean()
+    message = graphene.String()
     
     def mutate(self, info, id, capicity, location):
+        user = info.context.user
+        if not user.is_authenticated:
+            raise Exception(f"You are not authorized!")
+        
+        if not user.profile.member_user.category == "DR":
+            raise Exception("You are not a driver.")
         vehicle = Vehicle.objects.get(id = id)
         vehicle.capicity = capicity
         vehicle.location = location
         vehicle.save()
-        return VehicleUpdate(vehicle = vehicle)
+        return VehicleUpdate(vehicle = vehicle, success = True, message = "Vehicle success updated!")
 
 
 class VehicleDelete(graphene.Mutation):
@@ -125,14 +143,23 @@ class VehicleDelete(graphene.Mutation):
         id = graphene.ID(required = True)
         
     vehicle = graphene.Field(VehicleType)
+    success = graphene.Boolean()
+    message = graphene.String()
     
     def mutate(self, info, id):
+        user = info.context.user
+        if not user.is_authenticated:
+            raise Exception(f"You are not authorized!")
+        if not user.profile.member_user.category == "DR":
+            raise Exception("You are not a driver.")
+        
         vehicle = Vehicle.objects.get(id = id)
         vehicle.delete()
-        return VehicleUpdate(vehicle = vehicle)
+        return VehicleUpdate(vehicle = vehicle, success = True, message = "Vehicle success deleted!")
 
 
 class BookingCreate(graphene.Mutation):
+    
     class Arguments:
         vehicle = graphene.ID()
         price = graphene.String()
@@ -141,18 +168,23 @@ class BookingCreate(graphene.Mutation):
         start_time = graphene.DateTime()
         end_time = graphene.DateTime()
         status = graphene.String()
-    
+
     booking = graphene.Field(BookingType)
+    success = graphene.Boolean()
+    message = graphene.String()
     
-    def mutate(self, info, vehicle, price, from_place, to_place, start_time, end_time, status):
+    def mutate(self, info, vehicle, price, from_place, to_place, start_time, end_time):
+        user = info.context.user
+        if not user.is_authenticated:
+            raise Exception(f"You are not authorized!")
         booking = Booking.objects.create(vehicle_id = vehicle, 
                                price = price, 
                                from_place = from_place,
                                to_place = to_place,
                                start_time = start_time, 
                                end_time = end_time,
-                               status = status)
-        return BookingCreate(booking = booking)
+                               status = 'complete')
+        return BookingCreate(booking = booking, success = True, message = "Booking success created!")
 
     
 class BookingUpdate(graphene.Mutation):
@@ -166,25 +198,35 @@ class BookingUpdate(graphene.Mutation):
         status = graphene.String(required = True)
         
     booking = graphene.Field(BookingType)
-
+    success = graphene.Boolean()
+    message = graphene.String()
+    
     def mutate(self, info, id, price, from_place, to_place):
+        user = info.context.user
+        if not user.is_authenticated:
+            raise Exception(f"You are not authorized!")
         booking = Booking.objects.get(id=id)
         booking.price = price
         booking.from_place = from_place
         booking.to_place = to_place
         booking.save()
-        return BookingUpdate(booking = booking)
+        return BookingUpdate(booking = booking, success = True, message = "Booking success updated!")
 
 class BookingDelete(graphene.Mutation):
     class Arguments:
         id = graphene.ID(required = True)
         
     booking = graphene.Field(BookingType)
-
+    success = graphene.Boolean()
+    message = graphene.String()
+    
     def mutate(self, info, id):
+        user = info.context.user
+        if not user.is_authenticated:
+            raise Exception(f"You are not authorized!")
         booking = Booking.objects.get(id=id)
         booking.delete()
-        return BookingUpdate(booking = booking)
+        return BookingUpdate(booking = booking, success = True, message = "Booking success deleted!")
 
 
 class OrderCreate(graphene.Mutation):
@@ -194,16 +236,30 @@ class OrderCreate(graphene.Mutation):
         user = graphene.ID()
     
     orders = graphene.Field(OrderType)
+    success = graphene.Boolean()
+    message = graphene.String()
     
-    def mutate(self, info , booking, capacity, user):
+    def mutate(self, info , booking, capacity):
+        user = info.context.user
         booking = Booking.objects.get(id = booking)
-        orders = Order.objects.create(booking = booking,
-                                    price = booking.price,
-                                    capacity = capacity, 
-                                    owner = booking.vehicle.owner.user,
-                                    user_id = user,
-                                    date = timezone.now().date())    
-        return OrderCreate(orders = orders)
+        try:
+            if not user.is_authenticated:
+                raise Exception(f"You are not authorized!")
+            
+            
+            if capacity > booking.vehicle.capicity:
+                raise Exception(f"The number of places cannot be greater than {booking.vehicle.capicity}")
+            
+            orders = Order.objects.create(booking = booking,
+                                        price = booking.price,
+                                        capacity = capacity, 
+                                        owner = booking.vehicle.owner.user,
+                                        user = user,
+                                        date = timezone.now().date())    
+            return OrderCreate(orders = orders, success = True, message = 'The order has been created.')
+                
+        except:
+            raise Exception(f"An unexpected error occurred!")
     
 class OrderUpdate(graphene.Mutation):
     class Arguments:
@@ -211,23 +267,24 @@ class OrderUpdate(graphene.Mutation):
         booking = graphene.ID(required = True)
         price = graphene.String(required = True)
         capacity = graphene.Int(required = True)
-        owner = graphene.ID(required = True)
-        user = graphene.ID(required = True)
         date = graphene.Date(required = True)
         
     orders = graphene.Field(OrderType)
+    success = graphene.Boolean()
+    message = graphene.String()
     
-    def mutate(self, info , id, booking, price, capacity, owner, user, date):
+    def mutate(self, info , id, booking, capacity, date):
+        user = info.context.user
+        if not user.is_authenticated:
+            raise Exception(f"You are not authorized!")
+        
         orders = Order.objects.get(id = id)
         orders.booking = booking
-        orders.price = price
         orders.capacity = capacity
-        orders.owner = owner
-        orders.user = user
         orders.date = date
         orders.save()
         
-        return OrderUpdate(orders = orders)
+        return OrderUpdate(orders = orders, success = True, message = 'The order has been updated.')
     
 class OrderDelete(graphene.Mutation):
     class Arguments:
@@ -236,6 +293,9 @@ class OrderDelete(graphene.Mutation):
     orders = graphene.Field(OrderType)
     
     def mutate(self, info , id):
+        user = info.context.user
+        if not user.is_authenticated:
+            raise Exception(f"You are not authorized!")
         orders = Order.objects.get(id = id)
         orders.delete()
         return OrderUpdate(orders = orders)
