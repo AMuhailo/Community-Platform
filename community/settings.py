@@ -13,13 +13,15 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 import os
 from pathlib import Path
 from datetime import timedelta
+import dj_database_url
 from environ import Env
 env = Env()
 Env.read_env()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
+ENVIRONMENT = env("ENVIRONMENT")
+ENVIRONMENT = 'prod'
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
@@ -27,9 +29,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = env("SECRET_KEY", default = 'your-secret-key')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
+if ENVIRONMENT == 'prod':
+    DEBUG = False
+    ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
+    # CSRF_TRUSTED_ORIGINS = [""*]
+else:
+    DEBUG = True
+    ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -79,7 +85,6 @@ GRAPHQL_JWT = {
 }
 
 AUTHENTICATION_BACKENDS = [
-    # "graphql_jwt.backends.JSONWebTokenBackend",
     'graphql_auth.backends.GraphQLAuthBackend',
     "django.contrib.auth.backends.ModelBackend",
 ]
@@ -175,12 +180,10 @@ TEMPLATES = [
     },
 ]
 
-
-WSGI_APPLICATION = 'community.wsgi.application'
-
 CHAR_API = env('CHAR_API')
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
+
 
 DATABASES = {
     'default': {
@@ -188,6 +191,17 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+if ENVIRONMENT == 'prod':
+    DATABASES['default'] = dj_database_url.parse(env("DATABASE_URL"))
+    
+    CELERY_BROKER_URL = env('REDIS_URL')
+    
+CELERY_TIMEZONE = "UTC"
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60
+CELERY_BROCKER_CONNECTION_RETRY_ON_STARTUP = True
+
+
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 # Password validation
@@ -220,20 +234,40 @@ USE_I18N = True
 
 USE_TZ = True
 
-#Celery
-CELERY_BROKER_URL = env('REDIS_URL')
-CELERY_TIMEZONE = "UTC"
-CELERY_TASK_TRACK_STARTED = True
-CELERY_TASK_TIME_LIMIT = 30 * 60
-CELERY_BROCKER_CONNECTION_RETRY_ON_STARTUP = True
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 MEDIA_URL = 'media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+
+if ENVIRONMENT == 'prod':
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.s3.S3Storage",
+        },
+        "staticfiles":{
+            "BACKEND":"django.contrib.staticfiles.storage.StaticFilesStorage"
+        }
+    }
+
+    AWS_ACCESS_KEY_ID = env("AWS_ACCESS_KEY_ID")
+    AWS_SECRET_ACCESS_KEY = env("AWS_SECRET_ACCESS_KEY")
+    AWS_STORAGE_BUCKET_NAME = env("AWS_STORAGE_BUCKET_NAME")
+    AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com"
+    AWS_S3_FILE_OVERWRITE = False
+    AWS_LOCATION = 'media'
+    
+else:
+    MEDIA_ROOT = BASE_DIR / 'media'
+    
+    
+    
+WSGI_APPLICATION = 'community.wsgi.application'
+
 
 AUTH_USER_MODEL = 'employees.User'
 LOGIN_URL = 'login'
