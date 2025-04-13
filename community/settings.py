@@ -21,7 +21,6 @@ Env.read_env()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 ENVIRONMENT = env("ENVIRONMENT")
-ENVIRONMENT = 'prod'
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
@@ -31,8 +30,8 @@ SECRET_KEY = env("SECRET_KEY", default = 'your-secret-key')
 # SECURITY WARNING: don't run with debug turned on in production!
 if ENVIRONMENT == 'prod':
     DEBUG = False
-    ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
-    # CSRF_TRUSTED_ORIGINS = [""*]
+    ALLOWED_HOSTS = ["communityplatform-production.up.railway.app","127.0.0.1", "localhost"]
+    CSRF_TRUSTED_ORIGINS = ["https://communityplatform-production.up.railway.app"]
 else:
     DEBUG = True
     ALLOWED_HOSTS = []
