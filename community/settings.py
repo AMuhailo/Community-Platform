@@ -50,7 +50,6 @@ INSTALLED_APPS = [
     
     #pip Apps
     'rest_framework',
-    'rest_framework_simplejwt',
     'debug_toolbar',
     'django_htmx',
     'storages',
@@ -97,9 +96,6 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ]
 }
 
 
