@@ -62,7 +62,7 @@ class ModeratorCreateView(MemberBarrier, LoginRequiredMixin, CreateView):
     model = Moderator
     form_class = UserCreateForm
     template_name = 'employees/moder/moder_create.html'
-    success_url = reverse_lazy('moder_url')
+    success_url = reverse_lazy('booking_list_url')
     
     def form_valid(self, form):
         user = self.request.user
