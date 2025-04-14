@@ -12,7 +12,7 @@ jobs:
         run: echo "${{ secrets.COM_PAT }}" | docker login ghcr.io --username amuhailo --password-stdin
 
       - name: Build Docker Image
-        run: docker build . -t ghcr.io/amuhailo/community-image:latest
+        run: docker build . -t ghcr.io/amuhailo/community-image
 
       - name: Push Docker Image
-        run: docker push ghcr.io/amuhailo/community-image:latest
+        run: docker push ghcr.io/amuhailo/community-image
