@@ -49,7 +49,7 @@ services:
       - web
       - postgres
       - redis
-    command: ['celery', '-A', 'warehouse', 'worker', '--pool=solo', '--loglevel=info']
+    command: ['celery', '-A', 'community', 'worker', '--pool=solo', '--loglevel=info']
 volumes:
   postgres_data:
   redis_data:
